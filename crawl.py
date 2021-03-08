@@ -1,12 +1,16 @@
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 
-# 打开一个浏览器
+from selenium.webdriver.common.keys import Keys
+
+# 打开浏览器 Chrome
 browser = webdriver.Chrome()
-# 准备一个网址
+# 准备网址
 url = 'https://dl.acm.org/doi/proceedings/10.1145/3387514'
 
 # 访问网址
 browser.get(url)
+
 # 获取元素
 element_list = browser.find_elements_by_class_name('issue-item__title')
 
@@ -17,6 +21,15 @@ for element in element_list:
     count += 1
     title = element.text
     print(str(count) + " : " + title)
+
+    # 点击此元素
+    # 使用ctrl+click
+    # 跳转为后台新页面
+    ActionChains(browser) \
+        .key_down(Keys.CONTROL) \
+        .click(element) \
+        .key_up(Keys.CONTROL) \
+        .perform()
 
 # 退出整个浏览器
 browser.quit()
