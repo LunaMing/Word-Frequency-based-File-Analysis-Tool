@@ -18,5 +18,5 @@ for element in element_list:
     title = element.text
     print(str(count) + " : " + title)
 
-# 退出
+# 退出整个浏览器
 browser.quit()
