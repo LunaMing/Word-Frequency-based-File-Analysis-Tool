@@ -10,6 +10,7 @@ browser.get(url)
 # 获取元素
 element_list = browser.find_elements_by_class_name('issue-item__title')
 
+# 计数
 count = 0
 # 拿到标题文字
 for element in element_list:
