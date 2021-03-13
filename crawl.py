@@ -34,7 +34,7 @@ while count < title_len:
     title = title_element.text
     print("title: " + title)
 
-    while len(browser.window_handles) < count + 2:
+    while len(browser.window_handles) < 3:
         # 点击此元素
         # 使用ctrl+click
         # 跳转为后台新页面
