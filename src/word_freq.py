@@ -1,19 +1,30 @@
+import re
+
 from nltk.corpus import stopwords
 
 
-def getText():
+def get_text():
     txt = open('../res/raw.txt', 'r', encoding='UTF-8').read()
 
-    txt = txt.lower()
-    for ch in '!"#$%&()*+,-–−./:;<=>?@[\\]^_‘{|}~∼→•≤∗´”“':
-        txt = txt.replace(ch, " ")  # 将文本中特殊字符替换为空格
+    # 特殊符号替换
+    # 将文本中特殊字符替换为空格
+    for ch in '!"#$%&()*+,-–−./:;<=>?@[\\]^_‘{|}~∼→•≤∗´”“\n':
+        txt = txt.replace(ch, " ")
+    # 将文本中数字替换为空格
     for ch in '0123456789':
-        txt = txt.replace(ch, " ")  # 将文本中数字替换为空格
+        txt = txt.replace(ch, " ")
+
+    # 只保留字母
+    txt = re.sub(r'[^A-Za-z ]+', '', txt)
+
+    # 改为全小写
+    txt = txt.lower()
+
     return txt
 
 
 def word_deal():
-    raw_txt = getText()
+    raw_txt = get_text()
     words = raw_txt.split()
 
     # 停用词表
