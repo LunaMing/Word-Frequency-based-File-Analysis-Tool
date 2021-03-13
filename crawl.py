@@ -1,9 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver import ActionChains
-
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-
+from selenium.webdriver.support import expected_conditions as EC
 # 打开浏览器 Chrome
+from selenium.webdriver.support.wait import WebDriverWait
+
 browser = webdriver.Chrome()
 # 准备网址
 url = 'https://www.usenix.org/conference/nsdi20/accepted-papers'
@@ -21,9 +23,10 @@ title_len = len(title_element_list)
 print("num of articles: " + str(title_len))
 
 # 计数
-count = 0
+# 第一个不是链接
+count = 1
 # 点击每个标题进行具体抓取
-for count in range(title_len):
+while count < title_len:
     print("count: " + str(count))
 
     # 获取文章标题
@@ -31,20 +34,16 @@ for count in range(title_len):
     title = title_element.text
     print("title: " + title)
 
-    # 点击此元素
-    # 使用ctrl+click
-    # 跳转为后台新页面
-    ActionChains(browser) \
-        .key_down(Keys.CONTROL) \
-        .click(title_element) \
-        .key_up(Keys.CONTROL) \
-        .perform()
+    while len(browser.window_handles) < count + 2:
+        # 点击此元素
+        # 使用ctrl+click
+        # 跳转为后台新页面
+        ActionChains(browser) \
+            .key_down(Keys.CONTROL) \
+            .click(title_element) \
+            .key_up(Keys.CONTROL) \
+            .perform()
 
-    # 等待新页面加载完毕
-    # 显示等待10秒
-    browser.implicitly_wait(10)
-
-    # todo 有几个新页面没有打开？
     # 计算新页面的句柄数
     # 最后一个句柄就是新打开的页面
     index_new = len(browser.window_handles) - 1
@@ -52,15 +51,16 @@ for count in range(title_len):
     # 窗口句柄切换到新页面
     browser.switch_to.window(handle_new)
 
-    # 获取摘要元素
-    abstract_elem = browser.find_element_by_xpath(
-        "/html/body/div[1]/div/main/div[2]/article/div[2]/div[2]/div[2]/div[1]/div/div[2]/p")
-    abstract = abstract_elem.text
-    # 打印摘要文本
-    print("abstract: " + abstract)
+    # 等待新页面加载完毕
+    try:
+        element = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "file"))
+        )
 
-    # 退出这个页面
-    # browser.close()
+        file_text = element.text
+        print(file_text)
+    finally:
+        browser.close()
 
     # 窗口句柄切换回到目录页面
     browser.switch_to.window(handle_old)
