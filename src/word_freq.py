@@ -4,7 +4,7 @@ from nltk.corpus import stopwords
 
 
 def get_text():
-    txt = open('../res/raw.txt', 'r', encoding='UTF-8').read()
+    txt = open('../res/pdf_text.txt', 'r', encoding='UTF-8').read()
 
     # 特殊符号替换
     # 将文本中特殊字符替换为空格
