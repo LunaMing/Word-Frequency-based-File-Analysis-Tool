@@ -23,3 +23,12 @@ def pdf2text():
 
     # Read all the text into one string
     print("\n\n".join(pdf))
+
+    # 打开一个文件
+    fo = open("../res/pdf_text.txt", "w", encoding='UTF-8')
+
+    for page in pdf:
+        fo.write(str(page) + "\n")
+
+    # 关闭打开的文件
+    fo.close()
