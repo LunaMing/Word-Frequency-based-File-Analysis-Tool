@@ -1,10 +1,10 @@
 import re
 
-from nltk.corpus import stopwords
+import wordcloud
 
 
 def get_text():
-    txt = open('../res/pdf_text.txt', 'r', encoding='UTF-8').read()
+    txt = open('../res/raw.txt', 'r', encoding='UTF-8').read()
 
     # 特殊符号替换
     # 将文本中特殊字符替换为空格
@@ -32,10 +32,10 @@ def word_deal():
     for word in words:
         word_list.append(word)
 
-    filtered_words = [word for word in word_list if word not in stopwords.words('english')]
+    # filtered_words = [word for word in word_list if word not in stopwords.words('english')]
 
     counts = {}
-    for word in filtered_words:
+    for word in words:
         counts[word] = counts.get(word, 0) + 1
     items = list(counts.items())
     items.sort(key=lambda x: x[1], reverse=True)
@@ -51,3 +51,10 @@ def word_deal():
 
     # 关闭打开的文件
     fo.close()
+
+
+def get_cloud():
+    w = wordcloud.WordCloud(background_color='white')
+    s = get_text()
+    w.generate(s)
+    w.to_file('../res/output.png')
