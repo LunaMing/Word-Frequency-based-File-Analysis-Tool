@@ -1,9 +1,17 @@
-from src.crawl import crawl
-from src.pdf2text import pdf2text
-from src.word_cloud import get_cloud
-from src.word_freq import word_deal
+from src.picture import cloud
+from src.word import word_deal, count
 
+# 爬虫
 # crawl()
-pdf2text()
-word_deal()
-get_cloud()
+
+total_str = ""
+pdf_name_list = ["nsdi20spring_arashloo_prepub", "nsdi20spring_birkner_prepub", "nsdi20spring_burnett_prepub"]
+for index in range(len(pdf_name_list)):
+    pdf_name = pdf_name_list[index]
+    # 文本处理
+    s = word_deal(pdf_name)
+    total_str += s
+    # 可视化
+    cloud(s, pdf_name + ".png")
+count(total_str)
+cloud(total_str, "total.png")
