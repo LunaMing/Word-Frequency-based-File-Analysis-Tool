@@ -45,6 +45,8 @@ def preprocessing(s: str):
 
 
 def count(raw_txt: str):
+    print("-- COUNT --")
+
     words = raw_txt.split()
 
     # 停用词表
