@@ -42,22 +42,25 @@ def pdf2text(pdf_name, txt_name):
 def get_text(txt_name):
     txt_path = '../output/' + txt_name
     txt_string = open(txt_path, 'r', encoding='UTF-8').read()
+    preprocessing(txt_string)
+    return txt_string
 
+
+def preprocessing(s):
     # 特殊符号替换
     # 将文本中特殊字符替换为空格
     for ch in '!"#$%&()*+,-–−./:;<=>?@[\\]^_‘{|}~∼→•≤∗´”“\n':
-        txt_string = txt_string.replace(ch, " ")
+        s = s.replace(ch, " ")
     # 将文本中数字替换为空格
     for ch in '0123456789':
-        txt_string = txt_string.replace(ch, " ")
+        s = s.replace(ch, " ")
 
     # 只保留字母
-    txt_string = re.sub(r'[^A-Za-z ]+', '', txt_string)
+    s = re.sub(r'[^A-Za-z ]+', '', s)
 
     # 改为全小写
-    txt_string = txt_string.lower()
-
-    return txt_string
+    s = s.lower()
+    return s
 
 
 def word_deal(raw_txt):
