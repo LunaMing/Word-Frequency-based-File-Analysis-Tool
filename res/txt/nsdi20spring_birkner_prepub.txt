@@ -1,0 +1,992 @@
+       Config2Spec: Mining Network Specifications from Network Configurations
+
+                  Rüdiger Birkner1        Dana Drachsler-Cohen2∗ Laurent Vanbever1                Martin Vechev1
+
+                                                1 ETH   Zürich         2 Technion
+
+
+
+
+                               Abstract                             homegrown over years, by a team of network engineers (some
+                                                                    of which do not even work there anymore).
+Network verification and configuration synthesis are promis-           This situation illustrates the difficulty of writing network
+ing approaches to make networks more reliable and secure            specifications. Akin to software specifications, formal spec-
+by enforcing a set of policies. However, these approaches re-       ifications are hard to write (as hard as writing the program
+quire a formal and precise description of the intended network      in the first place [20]), debug, and modify [2, 21]. Yet, with-
+behavior, imposing a major barrier to their adoption: network       out easier ways to provide network specifications, network
+operators are not only reluctant to write formal specifications,    verification and synthesis are unlikely to get widely deployed.
+but often do not even know what these specifications are.
+   We present Config2Spec, a system that automatically syn-         Config2Spec We introduce Config2Spec, a system that auto-
+thesizes a formal specification (a set of policies) of a network    matically mines a network’s specification from its configura-
+given its configuration and a failure model (e.g., up to two        tions and a failure model (e.g., up to k failures). Config2Spec
+link failures). A key technical challenge is to design a syn-       is precise: it returns all policies that hold under the failure
+thesis algorithm which can efficiently explore the large space      model (no false negatives) and only those (no false positives).
+of possible policies. To address this challenge, Config2Spec        Challenges Mining precise network specifications is chal-
+relies on a careful combination of two well-known methods:          lenging as it involves exploring two exponential search spaces:
+data plane analysis and control plane verification.                 (i) the space of all possible policies, and (ii) the space of
+   Experimental results show that Config2Spec scales to min-        all possible network-wide forwarding states. The challenge
+ing specifications of large networks (>150 routers).                stems from the fact that individually exploring each of the
+                                                                    search spaces can be prohibitive: a search for the true policies
+                                                                    is hard since they are a small fraction of the policy space,
+1     Introduction                                                  while a search for the violated policies is hard since these
+                                                                    require witnesses (data planes), which are often sparse.
+Consider the task of a network operator who—tired of human-
+induced network downtimes—decides to rely on formal meth-           Insights Config2Spec addresses the above challenges by com-
+ods to verify her network-wide configurations [4,14,22,30] or       bining the strengths of data plane analysis and control plane
+to synthesize them automatically [5, 9, 10, 28, 29]. The opera-     verification. Data plane analysis enables us to compute the set
+tor quickly realizes that both verifiers and synthesizers require   of policies that hold for a single data plane, thereby providing
+a specification of the correct intended network-wide behavior.      an efficient way of pruning policies. On the other hand, con-
+A few generic requirements quickly come to mind: surely             trol plane verification is an efficient way of validating that a
+she wants her network to ensure reachability. At the same           single policy holds for all the data planes. Config2Spec com-
+time, she realizes that her network does way more than just         bines the two approaches to prune the large space of policies
+ensuring reachability. Among others, it needs to enforce load       through sampling and data plane analysis and then, to avoid
+balancing for popular destinations, provide isolation between       the need of exploring all data planes, validating the remain-
+customers, drop traffic for suspicious prefixes, and reroute        ing policies with control plane verification. The key insight
+business traffic via predefined waypoints—all these under           is to dynamically identify the approach providing for better
+failures and over hundreds of devices. Writing the precise          progress. We design predictors which rely on past iterations
+specification seems daunting, especially as most of it has been     and the failure model to switch between the two approaches.
+
+    ∗ Work   done while at ETH Zürich.
+
+Scalability While this approach scales, we identify three                       p1
+                                                                                          1           1
+                                                                                                                  2   p2
+domain-specific techniques to improve it even further. First,
+                                                                                              2
+to better utilize the pruning through data plane analysis, we                        15                       3
+                                                                                                                  1
+design a policy-aware sampler of data planes. We experimen-                                       4
+                                                                                          5               2
+tally show that our approach outperforms a random sampler:                      3
+                                                                                                                  5
+with typically fewer samples, it leads to pruning substantially
+more policies. Second, to reduce the number of queries posed                                  access-list 10 deny p1
+to the verifier, we group queries to the control plane verifier.
+Third, we analyze the network topology to prune policies that      Figure 1: An OSPF network with five routers and two desti-
+are physically not feasible due to poor connectivity of the        nations. An ACL at router 5 blocks traffic destined to prefix
+routers. For large networks and permissive failure models,         p1, attached to router 1.
+this technique makes the difference between Config2Spec
+completing in few hours instead of days.
+                                                                   Usefulness In general, the network’s specification can be
+System We implemented Config2Spec, which leverages                 used for many different applications, such as configuration
+two state-of-the-art data plane analysis and control plane ver-    synthesis/verification and network management (e.g., analyz-
+ification tools, Batfish [13] and Minesweeper [4]. As the          ing the effects of configuration changes). Further, having
+implementation relies on these two tools, it is tied to configu-   the specification at hand allows network operators to check
+rations and features supported by them. The approach itself,       whether the policies they intend to enforce are indeed en-
+is not limited to any specific type of configuration.              forced.
+   Config2Spec provides a substantial improvement over base-          In multiple discussions, network operators confirmed that
+lines that use each of the above tools in isolation (up to 8.3x    a tool like Config2Spec is indeed useful. One operator
+against the best baseline). Further, Config2Spec often mines       mentioned that the adoption of a new monitoring tool fell
+a precise network specification within an hour, and for large      through because it required the network’s specification to
+networks (> 150 routers) within 2.7 hours (for OSPF config-        detect flawed configuration changes. Another operator men-
+urations) or 13.7 hours (for BGP configurations). We also          tioned that having the network’s specification at hand would
+illustrate that Config2Spec can handle real network configura-     greatly help them better understand their configurations that
+tions by running it successfully on Internet2’s configurations.    accumulated over years. Especially, since short-term fixes to
+                                                                   problems that need immediate attention (e.g., congestion and
+Contributions Our main contributions are:                          hardware problems) are often forgotten and persist even long
+                                                                   after the responsible engineer left the company. In addition,
+  • A novel approach to automatically mine the specification       the specification can be used to streamline network’s configu-
+    of a network by leveraging both data plane analysis and        ration by refactoring it, while keeping the same specification.
+    control plane verification (§3).
+  • A dynamic predictor to decide which approach provides
+    for better progress (§4).                                      2   Motivation and Problem Definition
+  • A policy-aware sampler to find data planes that are likely
+    to prune more policies (§5).                                   Obtaining a specification for how a network behaves can be
+  • Policy grouping and topology-based trimming to reduce          useful in a variety of scenarios beyond network verification
+    the number of queries posed to the verifier (§6, §7).          and synthesis, including helping the operator identify unex-
+                                                                   pected behaviors and inconsistencies, as well as enabling a
+  • An end-to-end implementation and an extensive evalua-
+                                                                   smoother transition to (updated) configurations upon new re-
+    tion across different topologies and baselines, showing
+                                                                   quirements. To define the problem of mining specifications,
+    that Config2Spec scales to large networks and signifi-
+                                                                   we rely on two concepts: a network specification, composed
+    cantly outperforms possible baselines (§8).
+                                                                   of a set of policies, and a failure model, specifying under
+                                                                   which failures the network specification should hold. We
+Novelty Several previous works [6, 7, 31] have looked into
+                                                                   next define these concepts and illustrate them on a running
+mining a network’s specification by observing the content of
+                                                                   example. Then, we introduce the network specification min-
+the data plane. All of these works are limited to reachability
+                                                                   ing problem and discuss several baseline approaches together
+policies and unlike Config2Spec, they either approximate the
+                                                                   with their shortcomings, thus motivating our solution.
+specification or do not consider the impact of failures on the
+specification. Concretely, they only produce the network’s         Running example Throughout the paper, we refer to the
+policies which hold when all links and routers are up. In          example shown in Fig. 1. Here, we have a network that
+contrast, Config2Spec is able to mine precise network specifi-     consists of five routers and seven links. There are two host
+cations for a given failure model.                                 networks, p1 and p2, attached to routers 1 and 2. All routers
+
+                                                                        Data Plane Analysis
+ Policy                      Meaning
+ reachability(r, p)          Traffic from r can reach p.
+                                                                                                                       …
+ isolation(r, p)             Traffic from r is isolated from p.
+ waypoint(r, w, p)           Traffic from r to p passes through w.
+ loadbalancing(r, p)         Traffic from r to p is load balanced       Initial Candidates    Sample #1   Sample #2        Specification
+                             on at least two paths.
+                                                                        Control Plane Verification
+
+Table 1: Network policies (r and w are routers, p is a prefix).                                           ✓
+                                                                                                                       …
+
+                                                                                                          ✘
+are in the same OSPF area and the OSPF weights are depicted             Initial Candidates    Query #1     Result #1       Specification
+
+on the links. An IP access control list (ACL) on the interface
+from router 5 to 2 drops all packets destined to prefix p1.                    Figure 2: Illustration of the baseline approaches.
+
+Failure models A failure model consists of a symbolic envi-
+ronment and a number k. The symbolic environment defines                For example, the policy reachability(5, p2) holds for the
+which links are up or down, and which links may fail. Tech-             failure model Lsymbolic = L and k = 1, but not for k = 3.
+nically, a symbolic environment is a partition of the network              In our work, we focus on reachability, isolation, waypoint,
+links L into three subsets Lup , Ldown , and Lsymbolic (i.e., given     and load balancing policies (summarized in Table 1). The
+Lup and Ldown , we can derive Lsymbolic = L \ (Lup ∪ Ldown )).          reachability, isolation, and load balancing policies are defined
+The number k is a bound on the total number of links which              as predicates over a router r and a subnet in the network p.
+can be simultaneously down. A concrete environment is a par-            These evaluate to true if, for the given concrete environment,
+tition of the network links L into two subsets Lup and Ldown .          traffic from router r can reach the prefix p, is isolated from
+Namely, all links are fixed to a concrete state: up or down.            p, or load balanced on at least two paths to p, respectively.
+We say that a failure model with a symbolic environment Lup      SE ,   The waypoint policy is defined over two routers r and w, and
+  SE      SE
+Ldown , Lsymbolic and a bound k, captures a concrete environ-           evaluates to true if, for the given concrete environment, traffic
+ment with LCE           CE        SE     CE   SE        CE              from r destined to prefix p passes through w. We note that our
+              up and Ldown if Lup ⊆ Lup , Ldown ⊆ Ldown , and
+   CE                                                                   approach is extensible to any policy that is defined over the
+|Ldown | ≤ k. Intuitively, a failure model captures all concrete
+                                          SE are up, the links in       forwarding state (e.g., equal length paths).
+environments for which the links in Lup
+  SE
+Ldown are down, and there are at most k links which are down.           Problem definition We now define the problem of mining a
+    For example, a failure model for our running example is             network specification:
+Lsymbolic = L (i.e., Lup and Ldown are the empty sets) and k = 1.         Given a network configuration and a failure model, mine
+This model describes any concrete environment with at most              the network specification, i.e., the set of all policies which
+one link failure. There are eight concrete environments which           hold under the failure model.
+meet this failure model: one where no link is down, and seven             For our running example and the failure model Lsymbolic = L
+in which each of the links fails once. Another failure model            and k = 1 (modeling up to one link failure), the network
+is Lup = {2-4}, Ldown = {2-5}, Lsymbolic = L \ (Lup ∪ Ldown ),          specification consists of the following policies:
+and k = 2. This model describes any concrete environment                reachability(1, p1), reachability(1, p2),
+whose link between routers 2 and 4 is up, the link between 2            reachability(2, p1), reachability(2, p2),
+and 5 is down, and the rest may be up or down. Since k = 2,             reachability(3, p1), reachability(3, p2),
+another failed link is allowed in addition to 2-5. There are six        reachability(4, p1), reachability(4, p2),
+concrete environments that meet this failure model.                     reachability(5, p2), loadbalancing(4, p2).
+                                                                        Baseline solutions To address the above problem, one may
+Network specification and policies A network specification
+                                                                        consider two baseline approaches: (i) data plane analysis and
+consists of a set of policies. A policy captures a specific
+                                                                        (ii) control plane verification.
+behavior in the network (e.g., reachability of two routers).
+It is modeled with a predicate (a constraint) which, given a            Data plane analysis Data plane analysis tools (e.g., [13, 17,
+concrete environment, evaluates to true if the policy holds for         18]) enable reasoning of policies that hold for a certain con-
+that concrete environment, and false otherwise. For our run-            crete environment. Today, such tools are scalable enough to
+ning example, the reachability(5, p2) policy evaluates                  reason about all of our considered policies within seconds or
+to true for the concrete environment in which all links are up,         minutes (mostly depending on the size of the network). Thus,
+and to false for the concrete environment where all links are           one could use such tools to mine a specification by iterating
+down. We say a policy holds for a failure model if it holds             over all concrete environments captured by the failure model,
+for all concrete environments captured by the failure model.            computing a data plane for each (from the configuration), and
+
+analyzing them to infer the set of policies which hold for each       Ldown = {2-5}, Lup = L \ Ldown ), and computing all policies
+concrete environment. The solution is then the intersection of        that hold for it, we can prune waypoint(3, 1, p2).
+all obtained policy sets. Fig. 2 (top) visualizes this approach.         On the other hand, there are sparse violations, which are
+Initially, every policy is a candidate which can be part of the       policies that do not hold for the failure model, but are violated
+network specification (blue area). With every sampled data            only by very few concrete environments. For example, in
+plane, the set of policies that hold for it are computed (shown       our running example and the same failure model, the policy
+in circle). These are then intersected with the policies of the       isolation(5, p1) is violated only by two concrete environ-
+previous samples (dashed circles). At the end, the remaining          ments: (i) Ldown = {2-5}, Lup = L \ Ldown and (ii) Ldown = {1-
+candidate policies are those that hold for all samples, and thus      2}, Lup = L \ Ldown . Unless we check these particular envi-
+form the network specification (green area). Unfortunately,           ronments, this policy cannot be pruned by data plane analysis.
+for large topologies or failure models with many concrete             Thus, we prune sparse violations during the step of control
+environments, this approach does not scale (see §8.2).                plane verification. Since the overall number of true policies
+Control plane verification Control plane verification tools           and sparse violations is often significantly smaller than the
+(e.g., [4]) enable checking individual policies for a given           number of concrete environments, control plane verification
+failure model. Technically, this can be accomplished by sym-          is an efficient solution for this.
+bolically encoding the network, its configuration, the failure
+model and a policy into a formula, and then checking the              3.2    The Config2Spec System
+satisfiability of this formula. Fig. 2 (bottom) visualizes this
+approach. Initially, all policies are part of the set of candi-       We build on this insight to design Config2Spec (Fig. 3), which
+dates of the specification. At every step, one policy (circle) is     takes as input the network configuration (of all devices) and a
+picked and posed as a query to the verifier. The verifier either      failure model and outputs the network specification.
+returns that the policy holds (green) or shows a counterexam-            Config2Spec runs in a loop which dynamically switches
+ple to disprove it (gray). In the end, every policy has either        between the two approaches until the specification is mined.
+been verified or disproved. As in data plane analysis, while          To achieve this, Config2Spec relies on three main components:
+control plane verification tools scale to the policies that we        (i) predictors, (ii) data plane analysis, and (iii) control plane
+consider, enumerating all possible policies and checking them         verification. In addition, Config2Spec maintains two sets of
+one by one in the above manner is prohibitive (see §8.2).             policies, cands which overapproximates the specification,
+                                                                      and verified which underapproximates it. We next explain
+                                                                      these sets, the algorithm flow and the three components. We
+3     Our Approach: Config2Spec                                       provide the full algorithm of Config2Spec in Appendix A.
+
+In this section, we first present our key insight of combining        Cands and verified Config2Spec keeps two sets: (i) cands,
+the two baseline approaches from §2 and explain the reason-           containing the current candidate policies, i.e., the policies
+ing behind it. Then, we provide an overview of the system             that are known to hold or have not been pruned yet, and
+(details are provided in the following sections).                     (ii) verified, containing the policies that are known to hold.
+                                                                      cands initially contains all possible policies (blue area in
+                                                                      Fig. 3), while verified is initially empty (green area in
+3.1    Key Insight                                                    Fig. 3). We note that in practice, to avoid storing all policies
+                                                                      in cands, only to prune many of them upon the first iteration
+We address the problem of mining a network specification
+                                                                      of data plane analysis, Config2Spec directly initializes cands
+by combining the baseline approaches and leveraging their
+                                                                      to the set of policies that holds for some concrete environment.
+respective strengths: data plane analysis is efficient at pruning
+                                                                          An invariant of the execution is that cands is a superset
+policies, while control plane verification is efficient at validat-
+                                                                      of the network specification, i.e., it contains at least all the
+ing policies. The key idea of our combination is to reduce the
+                                                                      policies that hold, while verified is a subset of it, i.e., it con-
+space of policies by sampling forwarding states and pruning
+                                                                      tains only policies that hold. Config2Spec terminates when
+policies using data plane analysis, and then running control
+                                                                      these sets are equal – implying both equal the network speci-
+plane verification to verify a small set of remaining policies.
+                                                                      fication – and then returns verified. Precision is ensured as
+   This combination works well because many policies which
+                                                                      Config2Spec does not miss any policy thanks to the invariant
+do not hold are dense violations. That is, they are violated for
+                                                                      that verified contains only true policies (no false positives),
+many of the concrete environments captured by the failure
+                                                                      while cands cannot miss a true policy (no false negatives).
+model. For example, in our running example and the failure
+model Lsymbolic = L with k = 1 (up to one failure), the policy        Flow At each iteration, Config2Spec checks if cands equals
+waypoint(3, 1, p2) only holds for the concrete environ-               verified. If so, it terminates. Otherwise, it checks two pre-
+ment in which all links are up, but the one from router 3 to          dictors to decide which approach is the more promising one
+4. Thus, by sampling any other concrete environment (e.g.,            to pursue: data plane analysis or control plane verification.
+
+                       Config2Spec
+      Network                                                                           §4       cands == verified?           Mined Network
+      Configuration                                             Predictors                                                    Specification
+
+                                                                                                                              loadbalancing(4, p2)
+                                                                                                                              reachability(1,
+                                                                                                                                       DF     p1)
+          …
+          ……
+           …                                                     §5                                                  §6, §7   reachability(1, p2)
+                                  Data Plane Analysis                           Control Plane Verification                             …
+      Failure Model                                                                                                           reachability(4, p2)
+                       PickCE     DPCompute          InferPol           TopoTrim         PickPolicies        CPVerification   reachability(5, p2)
+
+                                       p1        waypoint(3,1,p2)
+                                       p2
+                                                 loadbalancing(4,p2)
+                                                                                        reachability(1,p1)
+                                                                       waypoint(5,3,p1) reachability(2,p1)
+                                                                                                                       ✓
+           k=1                                   reachability(1,p1)
+                                                        …              waypoint(3,5,p2) reachability(3,p1)             ✘
+
+
+
+
+          cands                                                                                                                     verified
+
+
+Figure 3: Config2Spec mines the specification from the network configuration and the failure model. It relies on three components:
+predictors, data plane analysis, and control plane verification. It maintains two sets: cands, consisting of the current candidate
+policies, and verified, consisting of the verified policies. During the execution, policies are removed from cands or added to
+verified. When cands equals verified, both equal the network specification, and then verified is returned.
+
+
+Predictors (§4) We design two predictors to heuristically               Topology-based trimming (§7) TopoTrim analyzes the
+estimate which approach is likely to be more effective and              topology and the failure model to trim (i.e., prune) policies
+dynamically transition between them. The predictors consider            which cannot hold regardless of the configuration (e.g., due to
+the execution times and the number of pruned and verified               a lack of connectivity). It relies on graph algorithms to prune
+policies. The first predictor checks the effectiveness of each          reachability, waypoint, and loadbalancing policies.
+approach in classifying policies by measuring the time it
+needs to classify a single policy. The second predictor esti-
+mates the remaining time to mine the full specification.                4     Config2Spec’s Predictors
+Data plane analysis (§5) In every iteration of data plane               In this section, we describe how Config2Spec dynamically
+analysis, Config2Spec samples a concrete environment, com-              decides whether to run the data plane analyzer or the control
+putes the policies that hold for it, and removes from cands             plane verifier. This decision relies on two predictors that cap-
+any other policy. To sample a concrete environment, it exe-             ture the effectiveness of the approaches and the expected time
+cutes PickCE, which employs a novel policy-aware sampler                remaining. Accordingly, Config2Spec infers which approach
+to find a concrete environment likely to prune more policies.           is more likely to make better progress. The predictors are:
+Then, Config2Spec computes the data plane of that sample                (i) the Time-per-policy (TP) predictor, favoring the approach
+via DPCompute, which relies on prior tools (e.g., [13]). Next,          more likely to classify more policies in a single execution, and
+it executes InferPol to compute all policies which hold for             (ii) the Remaining-time (RT) predictor, favoring the approach
+this data plane, and updates cands accordingly. Finally, Con-           more likely to complete faster. If the predictors disagree on
+fig2Spec checks whether all data planes have been analyzed.             the approach, Config2Spec runs the data plane analyzer, we
+If so, it sets verified to cands, as the entire failure model           explain the reason for this choice shortly.
+has been covered and the full specification has been mined.
+                                                                        High-level behavior The predictors dynamically identify the
+Control plane verification (§6) In each iteration of control            different stages of the algorithm. In the beginning, sampling
+plane verification, Config2Spec verifies a set of policies. For         concrete environments is likely to provide the fastest progress,
+this, Config2Spec first executes PickPolicies to pick the               as at this stage the dense policies have not been pruned yet.
+next set of policies to verify. It then calls CPVerification,           Therefore, the TP predictor prefers data plane analysis ini-
+which relies on prior tools (e.g., [4]). The verifier either            tially. After most of the dense policies have been pruned,
+determines that all policies hold or returns a counterexam-             sampling environments may not significantly decrease the
+ple. In the former case, Config2Spec adds all the policies              number of candidate policies anymore. At this point, the TP
+to verified, while in the latter case Config2Spec removes               predictor starts to prefer control plane verification. Thus, the
+the ones violated by the counterexample from cands. Before              choice is then up to the RT predictor. It determines whether
+the first iteration of control plane verification, Config2Spec          Config2Spec switches to control plane verification. If running
+invokes TopoTrim to reduce the verification overhead.                   data plane analysis for the remaining concrete environments
+
+is likely to be faster than running control plane verification on
+                                                                                              1                   2     p1 1
+the remaining unclassified policies, the RT predictor prefers                                                            p2           1
+                                                                                                                                                  2
+                                                                                                                                                      2
+data plane analysis. Otherwise, it prefers control plane ver-                                         4                                   4
+ification. This choice depends on the failure model: if it                           3                            5       3                   4   5
+captures a small number of concrete environments, enumer-                                                                     3                       5
+
+ating all of them can be faster than verifying the remaining                    (a) Previous environment.             (b) Previous forwarding graphs.
+set of candidate policies. In our running example and the
+failure model Lsymbolic = L and k = 1, this is the case. To con-                              1           4       2               1               2
+clude, the joint behavior of the predictors is to prefer control                                  2           2
+                                                                                          1                     3
+plane verification whenever (i) there is a large number of con-                                       4                                   4
+                                                                                      3
+                                                                                              0               2 5
+crete environments and (ii) most remaining policies are true                                                               3                      5
+policies (i.e., part of the specification) or sparse violations.
+                                                                                    (c) Policy graph.                     (d) Next environment.
+
+Computation The predictors rely on statistics of the previous
+                                                                            Figure 4: The policy graph is computed from the forwarding
+runs. The TP predictor is implemented by tracking two times:
+  TP             T P , which record the average time to classify            graphs of a previously analyzed concrete environment and
+Tanalysis and Tveri  fy
+                                                                            guides us to an environment likely to prune more policies.
+a single policy through analysis or verification (respectively).
+        TP
+For Tanalysis , this time is computed by taking the ratio of the
+execution time of the last run of the data plane analysis and               5     Data Plane Analysis
+the number of policies which were pruned as a result of this
+                  T P , this time is computed similarly by taking
+analysis. For Tveri   fy                                                    In this section, we present the key ingredients of running the
+the ratio of the execution time of the last run of the verifier and         data plane analysis in Config2Spec: the selection of the next
+the number of policies which were classified by the verifier.               concrete environment to analyze (PickCE), the computation
+The latter number is one of the following. If the verifier proved           of the data plane for that environment (DPCompute) and the
+all policies hold, it equals the number of policies. Otherwise,             inference of the policies from the data plane (InferPol).
+if the verifier returned a counterexample, this number equals
+to the number of policies which were discovered as violations
+(i.e., the counterexample violated them). The TP predictor                  5.1    Selection of Concrete Environments
+                                        TP
+prefers the data plane analyzer if Tanalysis       TP .
+                                              < Tveri fy                    At every iteration, one concrete environment is analyzed. The
+                                                                            choice of this environment has a great impact on the overall
+   The RT predictor is implemented by tracking two (different)              runtime of the system. Thus, we design a sampling technique
+            RT
+times: Tanalysis         RT , which record the execution time
+                   and Tveri fy                                             to pick the next concrete environment to prune a large number
+of a single run of the analyzer and verifier (respectively). The            of policies from the set of candidates (cands). We call this
+RT predictor prefers the data plane analyzer if the remaining               technique policy-aware sampling as the next environment is
+                                                     RT
+time of the analyzer, obtained by multiplying Tanalysis     with            picked based on the policy graph, a concept reflecting the
+the number of non-analyzed concrete environments is smaller                 current set of candidate policies, which we describe next.
+than the remaining time of the verifier, given by multiplying
+  RT                                                                        Policy graph The policy graph for a given concrete environ-
+Tveri f ier with the remaining number of unclassified policies.             ment is a copy of the network topology, augmenting the links
+                                                                            with the number of policies that forward traffic along them.
+Initialization To initialize Tveri     TP           RT                      We say a reachability(r,p) policy forwards traffic along
+                                          f y and Tveri f y , Config2Spec
+executes the verifier on M policy sets (in our implementa-                  a link, if that link is part of a path in the forwarding graph of p
+tion, M = 10). It then sets Tveri      RT                                   from r to p. We define it similarly for the other policies. The
+                                          f y to the average execution
+                                   T P
+time of the verifier, and Tveri f y to the average ratio of exe-            policy graph allows us to identify the links on which large
+cution time and policies verified or pruned. The estimates                  numbers of policies depend. Thus, we can pick a concrete
+  TP
+Tanalysis     RT
+          , Tanalysis are initially 0, to guide Config2Spec to begin        environment in which these links are down. If the policies
+by data plane analysis. This captures our premise that initially            indeed hold only thanks to these links, they will be discovered
+data plane analysis is likely to classify more policies (the                as violations when analyzing this concrete environment.
+dense violations, which are the vast majority of the policies).                We next define the policy graph. Given a network topol-
+                                                                            ogy, a configuration, and a concrete environment, the policy
+                                                                            graph extends the network topology with a mapping of links
+Windows To smoothen the behavior of the predictors, the                     to weights (integers). The weight of a link represents the
+times are averaged over the last N runs of the analyzer or                  number of unclassified policies whose traffic is forwarded
+verifier (in our implementation, N = 10).                                   along that link. The weight is computed from the forward-
+
+ing graphs of the concrete environment. Fig. 4 illustrates         of router r indicates that traffic reaching r for destination p
+the concept of the policy graph using our running exam-            is sent to router w. Computing the forwarding state of the
+ple (Fig. 1). Here, we are given an (already analyzed) con-        routers is not trivial, however, there are solutions to efficiently
+crete environment where all links are up, but the one between      compute them (e.g., [13]).
+routers 3 and 4 (Fig. 4a). In this example, there are two              In the second step, DPCompute builds from the routers’ for-
+destinations (p1 and p2) and hence two forwarding graphs           warding states the forwarding graphs. It builds one forwarding
+(Fig. 4b). For simplicity’s sake, consider the following unclas-   graph for each equivalence class of destination prefixes (i.e.,
+sified policies for destination p2: reachability(i, p2),           prefixes which can be captured via some prefix and have the
+where i ranges over all five routers, and loadbalancing(4,         same forwarding graph). The forwarding graph of a prefix p
+p2), which holds since router 4 has three paths to router 2        is a directed graph in which we have a link from router r to w
+in the forwarding graph of p2. In this setting, the policy         if, according to r’s forwarding state, traffic for p is sent to w.
+graph (Fig. 4c) maps, for example, link 1-3 to 1 (as only              From the forwarding graphs, InferPol computes the poli-
+reachability(3, p2) depends on this link), link 2-5 to             cies by leveraging graph algorithms. For reachability and
+3 (for reachability(4, p2),reachability(5, p2) and                 waypoint policies, it builds the dominator tree of all for-
+loadbalancing(4, p2)), 1-2 to 4 (for reachability(1,               warding graphs. A dominator tree is a tree rooted at the
+p2), reachability(3, p2), reachability(4, p2) and                  destination of the forwarding graph. Its nodes are all routers
+loadbalancing(4, p2)), and 1-2 (which is down) to 0.               that have at least one path to the destination. A router a is
+Policy-aware sampling Based on the idea of the policy graph,       a child of a router b if (i) traffic from router a to the des-
+we design a policy-aware sampler for PickCE. The policy-           tination must pass through router b and (ii) for any other
+aware sampler picks the next concrete environment to ana-          router c such that traffic from a must pass through it, traf-
+lyze based on the policy graph of the previously analyzed          fic from b must also pass through it. InferPol infers a
+concrete environment and the current set of unclassified poli-     reachability(r, p) policy for every node r in the domina-
+cies (cands\verified). This is done by selecting the links         tor tree of p. It further infers waypoint(r,w,p) for all routers
+to add to Ldown based on a probability distribution propor-        r which are dominated by a waypoint w in the dominator tree
+tioned to the links’ weights in the policy graph. The links’       of p. For loadbalancing, it computes the shortest paths
+weights are computed by iterating over all unclassified poli-      in the network and infers loadbalancing(r,p) for routers
+cies (cands\verified) and counting, for each link, the num-        r with multiple paths of the same cost available to reach
+ber of policies that are forwarded along it. The probability       destination p. For isolation, it infers isolation(r,p)
+distribution is needed to avoid getting stuck: a deterministic     for every router r and prefix p for which it has not inferred
+approach which adds the heaviest links to Ldown can result         reachability(r,p).
+in an oscillation between two concrete environments which
+already have been analyzed (we observed this phenomenon            6    Control Plane Verification
+in practice). Adding non-determinism mitigates this issue,
+and in case it cannot, PickCE resorts to returning a random        Here, we present the two ingredients of the control plane veri-
+concrete environment which has not yet been analyzed. In           fication in Config2Spec: the selection of policies to verify next
+the beginning, Config2Spec starts by analyzing the concrete        (PickPolicies) and their verification (CPVerification).
+environment in which all symbolic links are up.
+   For our running example and the policy graph in Fig. 4c,
+                                            1
+it assigns the link 1-3 to the probability 14          3
+                                              , 2-5 to 14 , and    CPVerification We begin with CPVerification, which
+        4
+1-2 to 14 . Assuming the usual failure model (Lsymbolic = L        takes as input a set of policies, the network configuration and
+and k = 1), it then picks the next concrete environment by         the failure model. It checks whether all policies hold for any
+choosing one link that is down based on the distribution. For      concrete environment meeting the failure model (for the given
+example, it picks the link 1-2 (Fig. 4d).                          network configuration), or returns a counterexample.
+                                                                       Technically, the verifier symbolically encodes the configu-
+                                                                   ration and the failure model as logical constraints: ϕnet and
+5.2    Analysis of a Concrete Environment                          ϕ f model . The set of policies is encoded as aVconjunction over
+                                                                   formulas encoding the policies: ϕ pols = pl∈pols ϕ pl . The
+We now explain DPCompute and InferPol, which together              verifier checks the satisfiability of ϕnet ∧ ϕ f model ∧ ¬ϕ pols . If
+compute all policies that hold for a given concrete environ-       it is unsatisfiable, then all policies in pols hold. If the formula
+ment and configuration.                                            is satisfiable, then there is a counterexample, i.e., a concrete
+   The DPCompute algorithm executes two steps. First, for          environment captured by the failure model, which under the
+each router in the network, it computes the router’s forwarding    given configuration violates ϕ pols (i.e., at least one policy is
+state. The forwarding state of a router is a list of destination   violated). While the challenge of verifying network policies
+prefix and next hop pairs. A pair (p, w) in the forwarding state   is not trivial, there are effective solutions (e.g., [4]).
+
+PickPolicies This procedure takes the set of candidate poli-         TopoTrim first removes from the topology all links in Ldown ,
+cies (cands) and verified policies (verified) and returns the        updates k to k − |Ldown |, and then, for each link in Lup , it
+next set of policies to verify (from cands \ verified). Since        adds k additional links between the routers to simulate that
+verifying is computationally expensive, the goal is to mini-         these routers are (k + 1)-edge-connected. For example, for
+mize the overall execution time of the verifier. By choosing a       Lup = {(1, 3)}, Ldown = 0/ and k = 2, it adds two more edges
+set of policies which have a dependency, the overall execution       between 1 and 3, so they are considered 3-edge-connected.
+time of verifying them can be smaller than if they were veri-           Based on this, TopoTrim classifies the following policies
+fied one by one. Towards this goal, PickPolicies returns a           as violations (which are thus removed from cands). The poli-
+maximal set of policies with the same destination prefix p.          cies reachability(r,p) and loadbalancing(r,p), for
+   We pick p arbitrarily, as once Config2Spec chooses to run         any router r and prefix p such that (r, rp ) is not in a (k + 1)-
+the verifier, usually most policies are true policies.               edge-component, where rp is the router attached to p. The
+   Our grouping approach is always at least as good as verify-       policy waypoint(r,w,p) is classified as violation for any
+ing the policies one by one. The reason is that at each query        routers r and w and a prefix p such that (i) (r, w) is not in a
+to the verifier, at least one policy is classified. In the worst     (k + 1)-edge-component or (ii) (w, rp ) is not in a (k + 1)-edge-
+case, only one policy is classified as violation (if the verifier    component, where rp is the router attached to p.
+returned a counterexample which satisfies all policies but one).
+In a better case, several policies are classified as violation. In
+either of these cases, the violated policies are removed from        8     Experimental Evaluation
+cands, while the other policies in the set remain in cands
+(and will be verified in a later execution of CPVerfication).        In this section, we evaluate Config2Spec on multiple topolo-
+In the best case, all policies are classified as true policies.      gies to address the following research questions:
+Namely, we can only gain from verifying multiple policies in         RQ1 How does Config2Spec scale to realistic topologies?
+the same execution of the verifier. Further, our grouping is               We show that even for large networks with 158 routers
+maximal – grouping of policies with different prefixes is not               and 189 links, it completes within 2.7 hours for OSPF
+helpful, as each prefix has a different forwarding graph, and               configurations and 13.7 hours for BGP configurations.
+so the verifier does not gain from grouping such policies.           RQ2 How does Config2Spec compare to the baselines? We
+                                                                            show it improves the best one by up to a factor of 8.3.
+                                                                     RQ3 How do the domain-specific techniques contribute to
+7   Topology-based Trimming                                                 Config2Spec? We show that (i) the policy-aware sam-
+                                                                            pler leads to smaller candidate sets by up to a factor of
+In this section, we describe TopoTrim, a technique which                    2 compared to random, and obtains them with fewer
+reduces the load on the control plane verification by analyz-               samples, and (ii) topology-based trimming and policy
+ing the failure model and the network topology. TopoTrim                    grouping reduce the queries by up to a factor of 2’500.
+classifies policies as violations if their minimal connectivity      RQ4 Can Config2Spec be run on a real network configura-
+requirements are not met under the given failure model.                     tion? We illustrate this on the Internet2 configuration.
+   TopoTrim is executed the first time Config2Spec chooses to
+run the verifier. It relies on the insight that some policies can    Implementation Config2Spec is implemented in 5k lines of
+be classified as violations directly from the network topology       Python and Java code.1 It computes the routers’ forward-
+and failure model. For example, consider the network in Fig. 1       ing states (§5.2) using Batfish [13], and verifies policies us-
+and the failure model with Lsymbolic = L and k = 2 (i.e., up to      ing Minesweeper [4]. We extended Minesweeper with the
+two link failures). We can infer that reachability(3, p1)            waypoint and loadbalancing policies. We note that while
+cannot hold as 3 can become disconnected from the rest of            our implementation supports only configurations and features
+the network if both links connected to it fail. For the same         supported by these two third-party tools, our approach is not
+reason, any waypoint or loadbalancing policy where 3 is              limited to specific configuration types or features.
+involved can be classified as violation.                                Config2Spec takes as input the routers’ configurations and a
+   To prune such policies, TopoTrim computes the (k + 1)-            failure model. It outputs all policies that hold for the provided
+edge-connected components of the topology for a failure              input. For large networks, we assume the network operator
+model with k permitted failures. A (k + 1)-edge-connected            provides a list of devices that act as waypoints (e.g., mid-
+component is a set of nodes which remain connected even              dleboxes). In our experiments, we simulate it by randomly
+after removing any k edges. For example, for the network in          picking 20% of the routers to serve as waypoints.
+Fig. 1 and the same failure model (where k = 2), the following       Experiment setup To study how Config2Spec scales as a
+routers are in a 3-edge-connected component: {1, 2, 4}.              function of the topology size, we picked three topologies
+   There are efficient algorithms to compute (k + 1)-edge-           (small, medium, and large) from the Topology Zoo collec-
+connected components, however they do not support links that
+must be up or down (Lup or Ldown ). To take these into account,          1 Code   is available at https://github.com/nsg-ethz/config2spec.
+
+      Topology     k   Config     Overall    DPA     CPV              Topology      k   Candidates    Specification   Percent
+                       OSPF         38.8 s   100%     0%                            1       2’526.9        1’008.1       40%
+                   1
+                       BGP          68.3 s   100%     0%              BICS          2       2’504.4          304.0       12%
+                       OSPF        228.8 s    30%    70%                            3       2’482.1           57.6        2%
+      BICS         2
+                       BGP       1’341.2 s    85%    15%
+                                                                                    1      13’290.2         4517.1       34%
+                       OSPF        117.4 s    27%    73%
+                   3                                                  Columbus      2      13’150.4          350.4        3%
+                       BGP         319.7 s    14%    86%
+                                                                                    3      13’271.0           27.2      0.2%
+                       OSPF        398.0 s   100%     0%
+                   1                                                                1      93’416.2       17’908.3       18%
+                       BGP         457.2 s   100%     0%
+                                                                      US Carrier    2      85’021.0          702.8      0.8%
+                       OSPF      1’328.1 s    18%    82%
+      Columbus     2                                                                3      98’837.6            6.8     0.01%
+                       BGP       6’772.0 s    17%    83%
+                       OSPF        907.0 s    27%    73%
+                   3                                              Table 3: The number of candidate policies and the number
+                       BGP        2074.1 s    18%    82%
+                                                                  of policies in the specification Config2Spec returns. Percent
+                       OSPF      6’386.2 s   100%     0%          shows the fraction of the policies of all candidate policies.
+                   1
+                       BGP       6’813.4 s   100%     0%
+                       OSPF     10’528.4 s    15%    85%
+      US Carrier   2
+                       BGP      49’151.0 s     6%    94%
+                       OSPF      2’542.5 s    59%    41%          ber of failures (k), and the configuration type (Config). For
+                   3
+                       BGP       5’873.3 s    34%    66%          example, for the US Carrier topology with k = 3 and OSPF
+                                                                  configurations, Config2Spec completed within 43 minutes,
+Table 2: Execution time of Config2Spec as a function of the       where 59% of that time was spent on data plane analysis.
+network topology, number of failures and configuration type.         The results show that even for the US Carrier topology
+                                                                  with its 158 routers and 189 links, Config2Spec mined the
+                                                                  specification in a reasonable time (within 2.7 hours, for OSPF,
+tion [19]: BICS with 33 routers connected by 48 links, Colum-     and 13.7 hours, for BGP). The results also demonstrate that
+bus with 70 routers and 85 links, and US Carrier with 158         the runtime mainly depends on the network size, secondly on
+routers and 189 links. We used NetComplete [10] to synthe-        the failure model, and lastly on the configuration type. This
+size OSPF and BGP configurations using its path-ordering          is expected: the larger the network, the larger the set of candi-
+specifications for 2, 4, 8 and 16 prefixes. For each configura-   date policies and the set of concrete environments (whose size
+tion type and topology, we generated 5 configuration sets.        also depends on the failure model). In contrast to the effect of
+   For each set of router configurations, Config2Spec com-        the network size on the execution times, the permissiveness
+putes all policies which hold, for all four policy types in       of the failure model shows a different trend: execution times
+Table 1. We consider three failure models, where k is 1, 2,       increase from k = 1 and k = 2, but drop for k = 3. This is
+or 3, and we fix Lup = Ldown = 0/ and Lsymbolic = L (i.e., any    thanks to the topology-based trimming (§7), which becomes
+link can be up or down). The reported results are averaged        very significant for k = 3 (or higher values of k). For the eval-
+over these runs and the two configuration types (i.e., OSPF       uated topologies, most router pairs are not 4-edge-connected,
+and BGP). We ran all experiments in virtual machines with         thus many policies are pruned. We provide more details on
+32 GB of RAM and 12 virtual cores running at 2.3 GHz.             trimming in §8.3. The results show also that for k = 1, Con-
+                                                                  fig2Spec only performs data plane analysis. This is because
+                                                                  the number of concrete environments is significantly smaller
+8.1     Scalability of Config2Spec
+                                                                  than the number of candidate policies throughout execution,
+We begin by studying how Config2Spec scales to realistic          leading the RT predictor to favor data plane analysis. Lastly,
+topologies. To this end, we ran experiments on all three          results show that for BGP configurations, the execution time
+topologies and three failure models, and measured the time        is higher than for OSPF configurations. This is mainly due
+Config2Spec spent on the data plane analysis part – in-           to Minesweeper, for which we observe a five to ten times
+cluding PickCE, DPCompute (which invoked Batfish), and            increase in the verification time for BGP compared to OSPF.
+InferPol – and the control plane verification part – includ-         Table 3 reports the number of candidate policies and the
+ing PickPolicies and CPVerification (which invoked                number of policies in the specification, for each topology and
+Minesweeper). The other parts completed in negligible times       failure model, averaged across the different configuration sets
+and were thus ignored (e.g., TopoTrim completed within five       and the configuration types. The reported number of candi-
+seconds for US Carrier and less than a second for BICS).          date policies is the number of policies that hold for the first
+    Table 2 shows the overall execution time (Overall) and how    concrete environment picked by Config2Spec (Config2Spec
+it is split between data plane analysis (DPA) and control plane   always begins with data plane analysis). We consider this set
+verification (CPV) as a function of the topology, the num-        as the initial set of candidates, rather than all instantiations
+
+                  Config2Spec           DPAnalysis             CPVerification   8.3    Domain-specific Techniques
+             20                    40                    100
+                          43.3 ↑               148.7 ↑                409.6 ↑
+                                                                                We next study how the domain-specific techniques improve
+             15                    30                     75                    Config2Spec’s performance. We study the following aspects:
+Time [min]
+
+
+
+
+                                                                                (i) how the policy-aware sampler (§5.1) helps reducing the
+                                                                                number of concrete environments Config2Spec analyzes, and
+             10                    20                     50
+                                                                                (ii) how topology-based trimming (§7) and policy grouping
+                                                                                (§6) decrease the number of queries posed to the verifier.
+              5                    10                     25
+                                                                                Policy-aware sampler We compare the policy-aware sam-
+              0                     0                      0                    pler (called Policy-Aware) to a baseline which randomly picks
+                    1     2 3             1     2 3              1     2 3      a new concrete environment (called Random). We compare
+                        4 by 5                5 by 5                 6 by 5     them by instantiating PickCE with each approach and running
+                                                                                Config2Spec on the Topology Zoo topologies with the failure
+Figure 5: Config2Spec compared to the baselines of data plane
+                                                                                model Lsymbolic = L and k = 3, and with five sets of OSPF
+analysis and control plane verification on grid topologies and
+                                                                                configurations and five sets of BGP configurations.
+different failure models. The bars of DPAnalysis and k = 3
+                                                                                   Table 4 shows the results. The first four columns show,
+are cut, and their maximum value is denoted next to them.
+                                                                                for each approach, how many concrete environments were
+                                                                                analyzed before Config2Spec transitioned to the verifier, and
+of the four policy types (Table 1), as the latter contains many                 how many policies remained to verify (i.e., the percentage
+policies which no concrete environment satisfies.                               of remaining policies out of the policies that hold for the
+                                                                                first sample). For example, for BICS, Policy-Aware required
+   The results indicate that as the network size increases, the
+                                                                                on average 36.4 samples before Config2Spec switched to
+number of candidate policies increases, while the specifica-
+                                                                                verification, and at this point the size of the candidate policy
+tion size (i.e., the number of policies that hold for all concrete
+                                                                                set was reduced to 36.5% of the initial policy set (i.e., the set
+environments) significantly drops. This demonstrates the chal-
+                                                                                of policies which hold for the first sample).
+lenge of Config2Spec to search in the large space of candidate
+policies for the small set of policies that hold.                                  Generally, the smaller the set of remaining policies (i.e., the
+                                                                                closer the candidate set to the network specification is), the
+                                                                                better. As a secondary goal, the number of analyzed concrete
+8.2               Comparison to Baselines                                       environments should be relatively small. Results indicate
+                                                                                that Policy-Aware always obtains a better reduction in the
+We compare Config2Spec to the two baselines in §2: (i) a data                   size of the candidate set compared to Random. They also
+plane analysis approach, which enumerates all data planes to                    show that on average Policy-Aware typically required fewer
+infer the specification, and (ii) a control plane verification ap-              samples than Random. However, we note that in 6 out of
+proach, which verifies the candidate policies one by one. As                    the 30 experiments, Random switched to verification before
+neither of the baselines scales to the larger networks consid-                  Policy-Aware did. This is not because Random made better
+ered in the last section, in this experiment, we use three grid                 progress. In contrary, the TP predictor decided to switch, as it
+topologies of sizes: 4 by 5, 5 by 5 and 6 by 5. We generated                    observed that the concrete environments picked by Random
+five sets of OSPF configurations per topology and used the                      were not effectively pruning policies anymore.
+failure model Lsymbolic = L with k ranging from 1 to 3.                            The next two columns of Table 4 provide more statistics.
+   Fig. 5 shows the execution time of each approach as a                        We checked, for each experiment, the relative size of the
+function of the topology and failure model. For k = 2 and                       candidate sets for both approaches when Config2Spec with
+k = 3, Config2Spec outperforms the baselines: the data plane                    Policy-Aware transitioned to verification. For example, in
+analysis by 10.2x on average and up to 41.0x, and the control                   one experiment using BICS, Policy-Aware transitioned to
+plane verification by 3.8x on average and up to 8.3x. For k = 1,                verification after 32 samples, and at that point the number
+data plane analysis is faster than Config2Spec because of                       of candidate policies was 970, while for Random, after 32
+Config2Spec’s setup time (i.e., the verification of few policies                samples, there were 1’124 candidate policies, making the
+when initializing the predictors’ times, see §4). Still, the                    ratio 86.3%. In Table 4, Cands Ratio shows the average over
+overhead of Config2Spec is small (data plane analysis was                       the ten runs. We also checked how many additional samples
+faster on average by 24 seconds and by up to 37 seconds).                       Random required to reduce the candidate policies to (at most)
+   The results also show that both baselines have benefits. For                 the size obtained with Policy-Aware. For example, in that
+less permissive failure models, data plane analysis performs                    experiment for BICS, Policy-Aware required 32 samples to
+better than control plane verification, whereas for permissive                  reduce the candidates to 970 policies, while Random required
+failure models it is the other way around. This demonstrates                    43. Hence, Random needed 11 additional samples. In Table 4,
+the advantage of the dynamic combination of Config2Spec.                        Added Samples shows the average of this number. The re-
+
+                  Policy-Aware                Random               Cands                 Added             Policy-Aware                   Random
+ Topology      Samples Candidates       Samples Candidates         Ratio                 Samples       PickCE DPAnalysis            PickCE DPAnalysis
+ BICS             36.4        36.5%        42.1        39.5%       89.7%                 45.7          22.1 ms              1.4 s   0.5 ms             1.3 s
+ Columbus         71.0        16.6%        79.0        26.4%       60.5%                 109.0         63.1 ms              8.3 s   0.7 ms             7.7 s
+ US Carrier      113.8         9.6%       122.1        18.6%       51.6%                 >500         358.2 ms             57.8 s   1.4 ms            51.6 s
+
+Table 4: Comparison of the policy-aware sampler in PickCE (§5.1) and a random baseline. Samples is the number of samples
+before Config2Spec switched to verifier. Candidates is the percentage of remaining candidate policies at that point. Cands
+Ratio is the ratio of the candidate set sizes for Policy-Aware and Random when Config2Spec with Policy-Aware transitioned to
+verification. Added Samples is the number of samples Random needed to reduce the candidate set to the size of the candidate
+size with Policy-Aware. PickCE is the time to pick the next environment. DPAnalysis is the overall time to analyze a data plane.
+
+
+sults indicate that Policy-Aware not only obtains a smaller                                                     Trimming            Grouping
+candidate set, but reaches it significantly faster.                                      50                      20                     4
+   The last four columns of Table 4 show execution times:
+PickCE shows the execution time of the sampler, while DP-                                40
+                                                                                                                 15                     3
+
+
+
+
+                                                                           Queries [%]
+Analysis shows the overall execution time of a single data                               30
+plane analysis (i.e., DPCompute and InferPol). Results show                                                      10                     2
+that while Policy-Aware takes more time than Random (as                                  20
+expected), the overhead is negligible compared to the overall                                                     5                     1
+execution time of the data plane analysis.                                               10
+
+                                                                                          0                       0                     0
+Topology-based trimming and policy grouping We next                                              2          3          2     3                 2       3
+evaluate the topology-based trimming and policy grouping                                             BICS              Columbus                US Carrier
+in reducing the number of queries to the verifier. We ran the
+experiments for the three topologies and the failure model             Figure 6: Reduction in the number of queries to the verifier
+with k = 2 and k = 3 (for k = 1, Config2Spec only performs             thanks to topology-based trimming and policy grouping.
+data plane analysis §8.1). We measured how many queries
+to the verifier each technique saved. In every experiment, we
+recorded the number of policies Config2Spec had the first time
+it transitioned to the verification. This number, denoted B (for       8.4                    Running Config2Spec on Internet2
+baseline), provides the number of queries to the verifier if
+we did not use either technique. We also recorded how many
+policies were pruned thanks to topology-based trimming. We             Finally, we demonstrate that Config2Spec can handle real
+count each policy that has been pruned as one saved query              configurations. For this, we took a publicly available configu-
+for the verifier, and denote the overall saved queries by T (for       ration of the Internet2 network from May 2015 [8]. For Bat-
+trimming). Also, we recorded how many queries were posed               fish to be able to parse this configuration, we had to remove
+to the verifier (when employing policy grouping), and denote           multiple lines from it. Mostly, these parts concerned log-
+the number of queries by G (for grouping).                             ging (e.g., system dump-on-panic;), anonymization left-
+   Fig. 6 shows the percentage of remaining queries after              overs (e.g., Firewall Stanza Removed) and other (for our
+each optimization: B−T                          G
+                        B % for trimming and B % for policy            purposes) irrelevant parts (e.g., bfd-liveness-detection
+grouping. For example, for BICS and k = 2, trimming pruned             no-adaptation;). For Minesweeper to be able to verify
+51.1% of the policies. Policy grouping saved 41.5% and re-             our queries, we had to remove parts of the BGP route-maps
+duced the overall queries to the verifier to 9.6%. Overall, the        (community-matches and empty prefix-list matches). This
+reduction was 90.3%. The results show that the combination             does not affect the output, as we only mine the specification
+of trimming and policy grouping can reduce the number of               for internal prefixes, since no external peers are connected. In
+queries to as little as 0.04%. Trimming is especially power-           total, we had more than 90k lines of configuration. The topol-
+ful for the larger topologies and for more permissive failure          ogy consisted of 10 routers and 18 links. For a failure model
+models (k = 3). The policy grouping also significantly re-             with Lsymbolic = L and k from 1 to 3, Config2Spec required
+duces the number of queries to the verifier. The best case is          32, 314, and 1’805 seconds to infer the network specification.
+for the largest network, where trimming reduced the number             It consisted of 3’962, 3’405, and 3’339 policies. The high
+of queries to 1.15% and then policy grouping reduced it to             number of policies, even for k = 3, stems from the fact that
+0.04%, compared to the baseline.                                       the five routers on the east-coast almost form a clique.
+
+9   Related Work                                                    while others use a higher-level abstraction describing traffic
+                                                                    classes and high-level policies such as reachability and way-
+In this section, we survey related work across five dimensions:     pointing [24]. Despite the differences, Config2Spec’s output
+specification mining, data plane analysis, control plane verifi-    can be used by other tools, such as NetKAT [3], whose lan-
+cation, network specification languages, and counterexample-        guage can accommodate the policies we consider.
+guided inductive synthesis.                                         Counterexample-guided inductive synthesis (CEGIS)
+Specification mining Our work is inspired by works on spec-         CEGIS is a technique in program synthesis in which examples
+ification mining [1], where high-level specifications are auto-     guide the search for the target program [25, 26]. Technically,
+matically inferred from low-level execution of programs. One        from an initial set of examples (which may be empty), the
+example is Daikon [11], which dynamically detects program           synthesizer proposes a candidate program consistent with the
+invariants (e.g., x 6= 0) by running the program and observing      examples, and introduces it to a validator. The validator ei-
+the values the program computes. For computer networks,             ther confirms the candidate is the target program or returns
+Xie et al. [31] show how to compute the reachability spec-          a counterexample. The counterexample is added to the set
+ification for a given failure model based on the network’s          of examples, guiding the synthesizer to look for a different
+configuration. They compute the reachability upper bound –          candidate. Config2Spec can be seen as a synthesizer looking
+all policies that hold for at least one concrete environment –      for (all) policies that hold for a given network configuration
+and lower bound – all policies that hold for all concrete envi-     and failure model. Like CEGIS, it is guided by examples
+ronments. To scale, only an approximation of the bounds is          (the data planes) and a validator (the verifier). Unlike CEGIS,
+computed. In contrast, Config2Spec computes the exact lower         Config2Spec looks for all valid policies (and not a single one).
+bound of reachability, as well as other policies, and thereby       This poses a greater challenge, both in terms of the search
+obtains a precise specification. Benson et al. [6] show how         space and the burden on the validator. To cope, Config2Spec
+to mine reachability policy units, a high-level abstraction of      cleverly samples examples to prune the search space (without
+pair-wise reachability, from network configurations for a sin-      the help of the validator), trims and groups policies to save
+gle concrete environment. Like Config2Spec, it relies on data       queries to the validator, and dynamically switches between
+plane analysis. Unlike Config2Spec, failure models are not          sampling and verifying to expedite the search.
+supported. Other works [7, 15] assess the complexity of man-
+aging the network and its overall health, i.e., the frequency       10    Conclusion
+of performance and availability problems, by analyzing its
+configurations.                                                     We introduced Config2Spec, a scalable approach for mining
+                                                                    a network’s specification from its configuration and a failure
+Data plane analysis Config2Spec relies on a data plane an-
+                                                                    model. The key insight is to dynamically switch between data
+alyzer. Several works exist and they differ mostly in their
+                                                                    plane analysis and control plane verification. To scale further,
+input. There are tools that require the forwarding state as
+                                                                    we integrated three domain-specific techniques: (i) policy-
+input [16–18, 23], and others that compute the forwarding
+                                                                    aware sampling to pick concrete environments which are
+state from the network configuration [13]. These tools enable
+                                                                    more promising for policy pruning, (ii) policy grouping to
+to check various properties, such as reachability and isolation,
+                                                                    group queries and thereby reduce verification overhead, and
+for the single forwarding state being analyzed.
+                                                                    (iii) topology-based trimming to prune policies infeasible for
+Network verification Config2Spec also relies on a control           the given topology and failure model. We evaluated Con-
+plane verifier. Several works offer solutions for network verifi-   fig2Spec on different topologies and against two baselines.
+cation, supporting different kinds of queries. Minesweeper [4]      The results show that Config2Spec scales to large networks,
+relies on an SMT-solver, and is currently the most general          unlike the baselines, and that our domain-specific techniques
+solution: it supports various properties (e.g., reachability,       significantly contribute to the scalability.
+loop-freedom, router equivalence) and multiple (interacting)
+routing protocols. ERA [12] creates a unified control plane         Acknowledgements
+model that mainly allows to reason about reachability proper-
+ties under multiple routing protocols. ARC [14] constructs          We thank our shepherd Aditya Akella and the anonymous
+an abstract graph representation of the data plane computa-         reviewers for the constructive feedback and comments. We
+tion and supports various properties: reachability, isolation,      are especially grateful to Ahmed El Hassany for his feedback
+waypointing and control plane equivalence. Many other tools         and support with NetComplete.
+focus on a single protocol such as Bagpipe [30].
+Network specifications Many works introduce different net-
+work specification languages, varying in their expressiveness.
+Some allow to capture traffic classes at the path-level [3,5,27],
+
+References                                                     [13] Ari Fogel, Stanley Fung, Luis Pedrosa, Meg Walraed-
+                                                                    Sullivan, Ramesh Govindan, Ratul Mahajan, and
+ [1] Glenn Ammons, Rastislav Bodík, and James R Larus.              Todd D Millstein. A General Approach to Network
+     Mining Specifications. In ACM POPL, Portland, OR,              Configuration Analysis. In USENIX NSDI, Oakland,
+     USA, 2002.                                                     CA, USA, 2015.
+ [2] Glenn Ammons, David Mandelin, Rastislav Bodík, and        [14] Aaron Gember-Jacobson, Raajay Viswanathan, Aditya
+     James R Larus. Debugging Temporal Specifications               Akella, and Ratul Mahajan. Fast Control Plane Analysis
+     with Concept Analysis. In ACM PLDI, San Diego, CA,             using an Abstract Representation. In ACM SIGCOMM,
+     USA, 2003.                                                     Florianopolis, Brazil, 2016.
+ [3] Carolyn Jane Anderson, Nate Foster, Arjun Guha, Jean-     [15] Aaron Gember-Jacobson, Wenfei Wu, Xiujun Li, Aditya
+     Baptiste Jeannin, Dexter Kozen, Cole Schlesinger, and          Akella, and Ratul Mahajan. Management Plane Analyt-
+     David Walker. NetKAT: Semantic Foundations for                 ics. In ACM IMC, Tokyo, Japan, 2015.
+     Networks. In ACM POPL, San Diego, CA, USA, 2014.
+                                                               [16] Peyman Kazemian, Michael Chang, Hongyi Zeng,
+ [4] Ryan Beckett, Aarti Gupta, Ratul Mahajan, and David            George Varghese, Nick McKeown, and Scott Whyte.
+     Walker. A General Approach to Network Configuration            Real Time Network Policy Checking using Header
+     Verification. In ACM SIGCOMM, Los Angeles, CA,                 Space Analysis. In USENIX NSDI, Lombard, IL, USA,
+     USA, 2017.                                                     2013.
+ [5] Ryan Beckett, Ratul Mahajan, Todd Millstein, Jiten-
+                                                               [17] Peyman Kazemian, George Varghese, and Nick McK-
+     dra Padhye, and David Walker. Don’t Mind the Gap:
+                                                                    eown. Header Space Analysis: Static Checking for
+     Bridging Network-wide Objectives and Device-level
+                                                                    Networks. In USENIX NSDI, San Jose, CA, USA,
+     Configurations. In ACM SIGCOMM, Florianopolis,
+                                                                    2012.
+     Brazil, 2016.
+                                                               [18] Ahmed Khurshid, Xuan Zou, Wenxuan Zhou, Matthew
+ [6] Theophilus Benson, Aditya Akella, and David A. Maltz.
+                                                                    Caesar, and P Brighten Godfrey. Veriflow: Verifying
+     Mining Policies from Enterprise Network Configuration.
+                                                                    Network-Wide Invariants in Real Time. In USENIX
+     In ACM IMC, Chicago, IL, USA, 2009.
+                                                                    NSDI, Lombard, IL, USA, 2013.
+ [7] Theophilus Benson, Aditya Akella, and David A Maltz.
+     Unraveling the Complexity of Network Management.          [19] Simon Knight, Hung X Nguyen, Nickolas Falkner, Rhys
+     In USENIX NSDI, Boston, MA, USA, 2009.                         Bowden, and Matthew Roughan. The Internet Topology
+                                                                    Zoo. IEEE JSAC, 29(9):1765–1775, 2011.
+ [8] Min Cheng.     Small.   https://github.com/
+     jayvischeng/Small/tree/master/ServerData2,                [20] Axel van Lamsweerde.    Formal Specification: a
+     2015.                                                          Roadmap. In ACM FOSE, Limerick, Ireland, 2000.
+
+ [9] Ahmed El-Hassany, Petar Tsankov, Laurent Vanbever,        [21] Claire Le Goues and Westley Weimer. Specification
+     and Martin Vechev. Network-wide Configuration Syn-             Mining With Few False Positives. In TACAS, York,
+     thesis. In CAV, Heidelberg, Germany, 2017.                     United Kingdom, 2009.
+
+[10] Ahmed El-Hassany, Petar Tsankov, Laurent Vanbever,        [22] Nuno P. Lopes, Nikolaj Bjørner, Patrice Godefroid,
+     and Martin Vechev. NetComplete: Practical Network-             Karthick Jayaraman, and George Varghese. Check-
+     Wide Configuration Synthesis with Autocompletion. In           ing Beliefs in Dynamic Networks. In USENIX NSDI,
+     USENIX NSDI, Renton, WA, USA, 2018.                            Oakland, CA, USA, 2015.
+
+[11] Michael D Ernst, Jeff H Perkins, Philip J Guo, Stephen    [23] Haohui Mai, Ahmed Khurshid, Rachit Agarwal,
+     McCamant, Carlos Pacheco, Matthew S Tschantz, and              Matthew Caesar, P. Brighten Godfrey, and Samuel Tal-
+     Chen Xiao. The Daikon system for dynamic detec-                madge King. Debugging the Data Plane with Anteater.
+     tion of likely invariants. Elsevier Science of Computer        In ACM SIGCOMM, Toronto, ON, Canada, 2011.
+     Programming, 69(1-3):35–45, 2007.
+                                                               [24] Chaithan Prakash, Jeongkeun Lee, Yoshio Turner, Joon-
+[12] Seyed K Fayaz, Tushar Sharma, Ari Fogel, Ratul Maha-           Myung Kang, Aditya Akella, Sujata Banerjee, Charles
+     jan, Todd Millstein, Vyas Sekar, and George Varghese.          Clark, Yadi Ma, Puneet Sharma, and Ying Zhang. PGA:
+     Efficient Network Reachability Analysis Using a Suc-           Using Graphs to Express and Automatically Reconcile
+     cinct Control Plane Representation. In USENIX OSDI,            Network Policies. In ACM SIGCOMM, London, United
+     Savannah, GA, USA, 2016.                                       Kingdom, 2015.
+
+[25] Armando Solar-Lezama, Christopher Grant Jones, and
+     Rastislav Bodik. Sketching concurrent data structures.
+     In ACM PLDI, Tucson, AZ, USA, 2008.
+[26] Armando Solar-Lezama, Liviu Tancau, Rastislav Bodik,
+     Sanjit Seshia, and Vijay Saraswat. Combinatorial
+     sketching for finite programs. In ACM ASPLOS, San
+     Jose, CA, USA, 2006.
+[27] Robert Soulé, Shrutarshi Basu, Parisa Jalili Marandi,
+     Fernando Pedone, Robert Kleinberg, Emin Gun Sirer,
+     and Nate Foster. Merlin: A Language for Provision-
+     ing Network Resources. In ACM CoNEXT, Sydney,
+     Australia, 2014.
+[28] Kausik Subramanian, Loris D’Antoni, and Aditya
+     Akella. Genesis: Synthesizing Forwarding Tables in
+     Multi-tenant Networks. In ACM POPL, Paris, France,
+     2017.
+[29] Kausik Subramanian, Loris D’Antoni, and Aditya
+     Akella. Synthesis of Fault-Tolerant Distributed Router
+     Configurations. In ACM SIGMETRICS, Irvine, CA,
+     USA, 2018.
+
+[30] Konstantin Weitz, Doug Woos, Emina Torlak,
+     Michael D. Ernst, Arvind Krishnamurthy, and Zachary
+     Tatlock. Scalable Verification of Border Gateway Pro-
+     tocol Configurations with an SMT Solver. In ACM
+     OOPSLA, Amsterdam, Netherlands, 2016.
+
+[31] Geoffrey G Xie, Jibin Zhan, David A Maltz, Hui Zhang,
+     Albert Greenberg, Gisli Hjalmtysson, and Jennifer Rex-
+     ford. On Static Reachability Analysis of IP Networks.
+     In IEEE INFOCOM, Miami, FL, USA, 2005.
+
+ Algorithm 1: Config2Spec(conf, F )                                       ification. When the algorithm terminates, cands is exactly
+     Input : conf: The network configuration.                             the set of policies which hold. During the execution, policies
+            F : the failure model (i.e., Lup , Ldown , Lsymbolic , k).    which are discovered as violations are removed from cands.
+                                                                          Initially, this set consists of all reachability, isolation, load
+     Output :A specification: the set of all policies that hold for the   balancing, and waypoint policies. Although we focus on these
+             given configuration and failure model.                       policies, our algorithm easily extends to any policy supported
+                                                                          by the data plane analyzer and control plane verifier.
+1    cands ← allPolicies()                                                   The verified set is the set of all policies that the verifier
+2    verified, prevEnvs, lastFwds ← 0,         / 0/
+                                             / 0,                         proved to be part of the network specification. That is, it is a
+3
+       T P , T RT
+     Tveri              ←   initVerificationTimes()
+           f y veri f y                                                   subset of the set of policies which hold. When the algorithm
+       TP
+     Tanalysis     RT
+               , Tanalysis ← 0, 0
+4                                                                         terminates, verified is exactly the network specification.
+5    totalEnvs ← ∑ j=0 |Lsymbolic
+                        k
+                                   j
+                                       |
+                                                                          During the execution, policies which are discovered as true
+6    while cands 6=verified do                                            policies are added to it.
+7
+                           RT
+           DP-RT ← Tanalysis       · (totalEnvs − |prevEnvs|)                The prevEnvs set contains all previously analyzed con-
+8
+                           RT
+           CP-RT ← Tveri f y · |cands \ verified|                         crete environments, while the lastFwds set contains the for-
+9
+                TP
+           if Tanalysis       T P or DP-RT < CP-RT then
+                        < Tveri                                           warding graphs of the last analyzed concrete environment,
+                                 fy
+10              env ← PickCE(F , cands\verified, prevEnvs,                which is used to pick the next concrete environment.
+                  lastFwds)
+                                RT
+                lastFwds, Tanalysis     ← DPCompute(env, conf)
+11                                                                        Initialization of predictors’ times As discussed in §4, our
+                pols = InferPol(lastFwds)                                 predictors rely on four time estimates: Tanalysis    TP        TP
+                                                                                                                                     , Tveri f ier ,
+12
+                                                            RT
+                  TP                                      Tanalysis         RT              RT
+13              Tanalysis ← (cands \ pols = 0)
+                                            / ?∞:
+                                                       |cands\pols|
+                                                                          Tanalysis , and Tveri f y . These are initialized as discussed in §4,
+                                                                          where to initialize Tveri   T P and T RT , Config2Spec executes
+14              cands ← cands ∩ pols                                                                     fy      veri f y
+15              prevEnvs ← prevEnvs ∪ {env}                               the verifier on M policy sets by running M times Line 18–
+16              if |prevEnvs| = totalEnvs then verified ← cands           Line 25, which are shortly explained.
+17       else
+18              pols ← PickPolicies(cands, verified)                      Flow After initialization, Config2Spec runs in a loop which
+                       RT
+19              cex, Tveri f y ← CPVerification(pols, conf,F )            terminates when verified equals cands, indicating that both
+20              if cex = ⊥ then                                           are equal to the network specification. At each iteration of
+21                   verified ← verified ∪ pols                           the loop, Config2Spec first computes the predictors to pick
+                                    RT
+                         TP ←     Tveri
+22                     Tveri fy   |pols|
+                                        fy
+                                                                          between the data plane analyzer and the control plane verifier.
+                                                                                                       TP
+                                                                          The TP predictor checks Tanalysis        T P . The RT predictor
+                                                                                                              < Tveri
+23              else                                                                                                  fy
+24                     cands ← cands \ {p ∈ pols| cex violating p}        checks DP-RT < CP-RT , where DP-RT and CP-RT are the
+                                              RT
+                                            Tveri                         remaining times of the analyzer and verifier.
+25
+                         TP ←
+                       Tveri                      fy
+                             fy   {p∈ pols| cex violating p}                 If the data plane analysis is chosen to be executed (Line 10–
+                                                                          Line 16), Config2Spec invokes PickCE to pick the next con-
+26   return verified                                                      crete environment. It then calls DPCompute, to compute the
+                                                                          forwarding graphs, and InferPol, to compute all policies
+                                                                          from cands that hold for this environment. Afterwards, it
+                                                                                                          RT
+A       Main Algorithm of Config2Spec                                     updates the time estimates Tanalysis  (to the execution time of
+                                                                                                T P
+                                                                          DPCompute) and Tanalysis (to the execution time per policy
+Here, we present the main algorithm of Config2Spec (Algo-                 which was pruned in this iteration). Then, it retains in cands
+rithm 1). Our algorithm takes as input the configuration conf             only the policies that hold for the given environment and up-
+and a failure model F consisting of Lup , Ldown , Lsymbolic and           dates prevEnvs with the new environment. Finally, it checks
+k. It outputs all policies which hold for this setting. The algo-         whether there are still more concrete environments to analyze.
+rithm maintains the time estimates presented in §4 as well as             If not, then cands contains only true policies, and so it sets
+a few sets. We next present these sets and the initialization of          verified to cands.
+the time estimates, and afterwards the algorithm flow.                       If the control plane verification is chosen (Line 18–
+                                                                          Line 25), Config2Spec picks a set of policies to ver-
+Main data structures The algorithm maintains four sets:                   ify via PickPolicies. It then calls the verifier via
+cands, verified, prevEnvs, and lastFwds.                                  CPVerification. The result is a counterexample cex, which
+  The cands set contains all policies that are still candidates           may be ⊥, to indicate that all policies hold, or a concrete en-
+for the network specification (i.e., unclassified policies and            vironment if some of the policies are violated. If cex is ⊥, all
+verified policies). That is, it is a superset of the network spec-        policies are added to verified and Tveri  T P is set to the ratio
+                                                                                                                       fy
+
+of the execution time and all policies (since all have been        contains the network specification (i.e., the specification is a
+classified). If cex is not ⊥, then Config2Spec removes from        subset of it) and (ii) verified is always contained in the net-
+                                                           TP
+cands the policies which are violated by cex, and sets Tveri       work specification. Because the algorithm terminates when
+                                                              fy
+to the ratio of the execution time and violated policies (since    these sets are equal, we get the guarantee.
+only they are classified).
+                                                                      Second, Config2Spec always terminates. For this, we rely
+Correctness We next discuss the correctness of Con-                on the data plane analysis and control plane verification to al-
+fig2Spec. First, Config2Spec is precise. That is, it returns       ways terminate. We then make the claim that at each iteration
+all policies which hold and only the policies which hold. The      either a new concrete environment is analyzed (guaranteed
+correctness argument relies on the data plane analysis and         by PickCE) or at least one policy is classified (guaranteed by
+control plane verification being precise with respect to their     the control plane verification). Since the number of concrete
+tasks: the data plane analysis returns all and only those poli-    environments and policies is finite, at some point either all
+cies which hold for the given concrete environment, while          policies are classified – at which point cands=verified and
+the control plane verification returns a counterexample if and     the algorithm terminates – or all concrete environments have
+only if some of the given policies do not hold. With this          been analyzed – at which point, Config2Spec sets verified
+assumption, we can prove the invariant that (i) cands always       to cands (Line 16), thereby terminating the algorithm.
+

@@ -3,7 +3,7 @@ import re
 import pdftotext
 
 
-def word_deal(pdf):
+def word_deal(pdf: str):
     txt_path = pdf2text(pdf)
     raw_str = open(txt_path, 'r', encoding='UTF-8').read()
     s = preprocessing(raw_str)
@@ -11,45 +11,23 @@ def word_deal(pdf):
     return s
 
 
-def pdf2text(pdf_name):
+def pdf2text(pdf_name: str):
+    # 读取pdf文件
     pdf_path = "../res/pdf/" + pdf_name + ".pdf"
-
-    # Load your PDF
     with open(pdf_path, "rb") as f:
         pdf = pdftotext.PDF(f)
 
-    # # If it's password-protected
-    # with open("secure.pdf", "rb") as f:
-    #     pdf = pdftotext.PDF(f, "secret")
-
-    # How many pages?
-    print(len(pdf))
-
-    # Iterate over all the pages
-    for page in pdf:
-        print(page)
-
-    # Read some individual pages
-    print(pdf[0])
-    print(pdf[1])
-
-    # Read all the text into one string
-    print("\n\n".join(pdf))
-
-    # 打开一个文件
+    # 写入txt文件
     txt_path = "../res/txt/" + pdf_name + ".txt"
     fo = open(txt_path, "w", encoding='UTF-8')
-
     for page in pdf:
         fo.write(str(page) + "\n")
-
-    # 关闭打开的文件
     fo.close()
 
     return txt_path
 
 
-def preprocessing(s):
+def preprocessing(s: str):
     # 特殊符号替换
     # 将文本中特殊字符替换为空格
     for ch in '!"#$%&()*+,-–−./:;<=>?@[\\]^_‘{|}~∼→•≤∗´”“\n':
@@ -66,7 +44,7 @@ def preprocessing(s):
     return s
 
 
-def count(raw_txt):
+def count(raw_txt: str):
     words = raw_txt.split()
 
     # 停用词表

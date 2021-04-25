@@ -1,6 +1,12 @@
-from src.picture import get_cloud
+from src.picture import cloud
 from src.word import word_deal
 
 # crawl()
-s = word_deal("nsdi20spring_arashloo_prepub")
-get_cloud(s)
+
+pdf_name = "nsdi20spring_arashloo_prepub"
+s = word_deal(pdf_name)
+cloud(s, "arashloo.png")
+
+pdf_name = "nsdi20spring_birkner_prepub"
+s = word_deal(pdf_name)
+cloud(s, "birkner.png")
