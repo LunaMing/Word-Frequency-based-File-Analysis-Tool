@@ -3,9 +3,11 @@ import re
 import pdftotext
 
 
-def pdf2text():
+def pdf2text(pdf_name, txt_name):
+    pdf_path = "../res/pdf/" + pdf_name
+
     # Load your PDF
-    with open("../res/pdf/nsdi20spring_arashloo_prepub.pdf", "rb") as f:
+    with open(pdf_path, "rb") as f:
         pdf = pdftotext.PDF(f)
 
     # # If it's password-protected
@@ -27,7 +29,8 @@ def pdf2text():
     print("\n\n".join(pdf))
 
     # 打开一个文件
-    fo = open("../output/pdf_text.txt", "w", encoding='UTF-8')
+    txt_path = "../output/" + txt_name
+    fo = open(txt_path, "w", encoding='UTF-8')
 
     for page in pdf:
         fo.write(str(page) + "\n")
@@ -36,24 +39,25 @@ def pdf2text():
     fo.close()
 
 
-def get_text():
-    txt = open('../res/raw.txt', 'r', encoding='UTF-8').read()
+def get_text(txt_name):
+    txt_path = '../output/' + txt_name
+    txt_string = open(txt_path, 'r', encoding='UTF-8').read()
 
     # 特殊符号替换
     # 将文本中特殊字符替换为空格
     for ch in '!"#$%&()*+,-–−./:;<=>?@[\\]^_‘{|}~∼→•≤∗´”“\n':
-        txt = txt.replace(ch, " ")
+        txt_string = txt_string.replace(ch, " ")
     # 将文本中数字替换为空格
     for ch in '0123456789':
-        txt = txt.replace(ch, " ")
+        txt_string = txt_string.replace(ch, " ")
 
     # 只保留字母
-    txt = re.sub(r'[^A-Za-z ]+', '', txt)
+    txt_string = re.sub(r'[^A-Za-z ]+', '', txt_string)
 
     # 改为全小写
-    txt = txt.lower()
+    txt_string = txt_string.lower()
 
-    return txt
+    return txt_string
 
 
 def word_deal(raw_txt):
