@@ -1,5 +1,3 @@
-import re
-
 import pdftotext
 from nltk.corpus import stopwords
 
@@ -41,38 +39,16 @@ def pdf2text(pdf_name: str):
         fo.write(str(page) + "\n")
     fo.close()
 
+    print("PDF -> TXT : " + txt_path)
     return txt_path
 
 
 def preprocessing(s: str):
-    """预处理
-
-        包括：将文本中特殊字符、数字替换为空格、只保留字母。
-
-    """
-    # 将文本中特殊字符替换为空格
-    for ch in '!"#$%&()*+,-–−./:;<=>?@[\\]^_‘{|}~∼→•≤∗´”“\n':
-        s = s.replace(ch, " ")
-    # 将文本中数字替换为空格
-    for ch in '0123456789':
-        s = s.replace(ch, " ")
-
-    # 只保留字母
-    s = re.sub(r'[^A-Za-z ]+', '', s)
-
-    # 改为全小写
-    # s = s.lower()
-
-    return s
-
-
-def count(raw_txt: str):
-    """统计文本频率"""
-    print("-- COUNT --")
+    """预处理"""
 
     # 分词
     word_list = []
-    words = raw_txt.split()
+    words = s.split()
     for word in words:
         # 大于一个字母的单词才有意义
         if len(word) > 1:
@@ -81,9 +57,27 @@ def count(raw_txt: str):
     # 停用词表
     filtered_words = [word for word in word_list if word not in stopwords.words('english')]
 
+    # 组装结果
+    res = ""
+    for w in filtered_words:
+        res = res + " " + w
+
+    return res
+
+
+def count(raw_txt: str):
+    """统计文本频率"""
+    print("-- COUNT --")
+
+    # 拆分字符串
+    word_list = []
+    words = raw_txt.split()
+    for word in words:
+        word_list.append(word)
+
     # 统计
     counts = {}
-    for word in filtered_words:
+    for word in word_list:
         counts[word] = counts.get(word, 0) + 1
 
     # 排序
