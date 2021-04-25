@@ -43,7 +43,7 @@ def word_deal(raw_txt):
         print("{0:<10}{1:>5}".format(word, count))
 
     # 打开一个文件
-    fo = open("../res/word_result.txt", "w", encoding='UTF-8')
+    fo = open("../output/word_result.txt", "w", encoding='UTF-8')
 
     for item in items:
         fo.write(str(item) + "\n")
