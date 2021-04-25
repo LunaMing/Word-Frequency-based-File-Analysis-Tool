@@ -55,4 +55,4 @@ def word_deal(raw_txt):
 def get_cloud(s):
     w = wordcloud.WordCloud(background_color='white')
     w.generate(s)
-    w.to_file('../res/output.png')
+    w.to_file('../output/cloud.png')
