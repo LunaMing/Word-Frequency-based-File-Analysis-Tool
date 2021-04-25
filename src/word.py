@@ -4,16 +4,15 @@ import pdftotext
 
 
 def word_deal(pdf):
-    txt_name = "pdf_text.txt"
-    pdf2text(pdf, txt_name)
-    raw_str = get_text(txt_name)
+    txt_path = pdf2text(pdf)
+    raw_str = open(txt_path, 'r', encoding='UTF-8').read()
     s = preprocessing(raw_str)
     count(s)
     return s
 
 
-def pdf2text(pdf_name, txt_name):
-    pdf_path = "../res/pdf/" + pdf_name
+def pdf2text(pdf_name):
+    pdf_path = "../res/pdf/" + pdf_name + ".pdf"
 
     # Load your PDF
     with open(pdf_path, "rb") as f:
@@ -38,7 +37,7 @@ def pdf2text(pdf_name, txt_name):
     print("\n\n".join(pdf))
 
     # 打开一个文件
-    txt_path = "../output/" + txt_name
+    txt_path = "../res/txt/" + pdf_name + ".txt"
     fo = open(txt_path, "w", encoding='UTF-8')
 
     for page in pdf:
@@ -47,11 +46,7 @@ def pdf2text(pdf_name, txt_name):
     # 关闭打开的文件
     fo.close()
 
-
-def get_text(txt_name):
-    txt_path = '../output/' + txt_name
-    txt_string = open(txt_path, 'r', encoding='UTF-8').read()
-    return txt_string
+    return txt_path
 
 
 def preprocessing(s):
