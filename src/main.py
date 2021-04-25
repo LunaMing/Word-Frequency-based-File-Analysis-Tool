@@ -1,5 +1,5 @@
 from src.picture import cloud
-from src.word import word_deal
+from src.word import word_deal, count
 
 # 爬虫
 # crawl()
@@ -13,4 +13,5 @@ for index in range(len(pdf_name_list)):
     total_str += s
     # 可视化
     cloud(s, pdf_name + ".png")
+count(total_str)
 cloud(total_str, "total.png")

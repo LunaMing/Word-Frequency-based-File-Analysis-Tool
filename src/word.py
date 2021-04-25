@@ -7,7 +7,6 @@ def word_deal(pdf: str):
     txt_path = pdf2text(pdf)
     raw_str = open(txt_path, 'r', encoding='UTF-8').read()
     s = preprocessing(raw_str)
-    count(s)
     return s
 
 
@@ -40,7 +39,7 @@ def preprocessing(s: str):
     s = re.sub(r'[^A-Za-z ]+', '', s)
 
     # 改为全小写
-    s = s.lower()
+    # s = s.lower()
     return s
 
 
