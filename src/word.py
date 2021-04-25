@@ -3,6 +3,15 @@ import re
 import pdftotext
 
 
+def word_deal(pdf):
+    txt_name = "pdf_text.txt"
+    pdf2text(pdf, txt_name)
+    raw_str = get_text(txt_name)
+    s = preprocessing(raw_str)
+    count(s)
+    return s
+
+
 def pdf2text(pdf_name, txt_name):
     pdf_path = "../res/pdf/" + pdf_name
 
@@ -42,7 +51,6 @@ def pdf2text(pdf_name, txt_name):
 def get_text(txt_name):
     txt_path = '../output/' + txt_name
     txt_string = open(txt_path, 'r', encoding='UTF-8').read()
-    preprocessing(txt_string)
     return txt_string
 
 
@@ -63,7 +71,7 @@ def preprocessing(s):
     return s
 
 
-def word_deal(raw_txt):
+def count(raw_txt):
     words = raw_txt.split()
 
     # 停用词表
@@ -83,7 +91,7 @@ def word_deal(raw_txt):
         print("{0:<10}{1:>5}".format(word, count))
 
     # 打开一个文件
-    fo = open("../output/word_result.txt", "w", encoding='UTF-8')
+    fo = open("../output/freq.txt", "w", encoding='UTF-8')
 
     for item in items:
         fo.write(str(item) + "\n")

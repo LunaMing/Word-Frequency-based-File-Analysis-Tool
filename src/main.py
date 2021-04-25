@@ -1,9 +1,6 @@
 from src.picture import get_cloud
-from src.word import pdf2text, get_text, word_deal
+from src.word import word_deal
 
 # crawl()
-pdf2text("nsdi20spring_arashloo_prepub.pdf", "pdf_text.txt")
-s = get_text("pdf_text.txt")
-word_deal(s)
-s = get_text("raw.txt")
+s = word_deal("nsdi20spring_arashloo_prepub.pdf")
 get_cloud(s)
