@@ -3,10 +3,9 @@ from src.word import word_deal
 
 # crawl()
 
-pdf_name = "nsdi20spring_arashloo_prepub"
-s = word_deal(pdf_name)
-cloud(s, "arashloo.png")
+pdf_name_list = ["nsdi20spring_arashloo_prepub", "nsdi20spring_birkner_prepub"]
 
-pdf_name = "nsdi20spring_birkner_prepub"
-s = word_deal(pdf_name)
-cloud(s, "birkner.png")
+for index in range(len(pdf_name_list)):
+    pdf_name = pdf_name_list[index]
+    s = word_deal(pdf_name)
+    cloud(s, pdf_name + ".png")
