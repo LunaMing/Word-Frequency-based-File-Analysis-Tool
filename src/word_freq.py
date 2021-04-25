@@ -23,8 +23,7 @@ def get_text():
     return txt
 
 
-def word_deal():
-    raw_txt = get_text()
+def word_deal(raw_txt):
     words = raw_txt.split()
 
     # 停用词表
@@ -53,8 +52,7 @@ def word_deal():
     fo.close()
 
 
-def get_cloud():
+def get_cloud(s):
     w = wordcloud.WordCloud(background_color='white')
-    s = get_text()
     w.generate(s)
     w.to_file('../res/output.png')
