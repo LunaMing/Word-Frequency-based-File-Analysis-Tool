@@ -1,5 +1,5 @@
-from src.pdf2text import pdf2text
-from src.word_freq import word_deal, get_cloud, get_text
+from src.picture import get_cloud
+from src.word import pdf2text, get_text, word_deal
 
 # crawl()
 pdf2text()
