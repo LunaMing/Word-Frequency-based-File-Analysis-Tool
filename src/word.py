@@ -1,16 +1,34 @@
 import re
 
 import pdftotext
+from nltk.corpus import stopwords
 
 
-def word_deal(pdf: str):
-    txt_path = pdf2text(pdf)
+def word_deal(pdf_name: str):
+    """ 文本处理对外接口
+
+        包括pdf转txt、文本预处理。
+
+        :param pdf_name: pdf文件名，不包含后缀。
+
+    """
+    txt_path = pdf2text(pdf_name)
     raw_str = open(txt_path, 'r', encoding='UTF-8').read()
     s = preprocessing(raw_str)
     return s
 
 
 def pdf2text(pdf_name: str):
+    """pdf转txt
+
+       将pdf转为txt文件。其中格式原封不动按照pdf来做，换行或左右双排无法特殊识别。
+
+       :param pdf_name: pdf文件名，不包含后缀
+       :type pdf_name: str
+       :returns: 生成的txt文件路径
+       :rtype: str
+       """
+
     # 读取pdf文件
     pdf_path = "../res/pdf/" + pdf_name + ".pdf"
     with open(pdf_path, "rb") as f:
@@ -27,7 +45,11 @@ def pdf2text(pdf_name: str):
 
 
 def preprocessing(s: str):
-    # 特殊符号替换
+    """预处理
+
+        包括：将文本中特殊字符、数字替换为空格、只保留字母。
+
+    """
     # 将文本中特殊字符替换为空格
     for ch in '!"#$%&()*+,-–−./:;<=>?@[\\]^_‘{|}~∼→•≤∗´”“\n':
         s = s.replace(ch, " ")
@@ -40,35 +62,42 @@ def preprocessing(s: str):
 
     # 改为全小写
     # s = s.lower()
+
     return s
 
 
 def count(raw_txt: str):
+    """统计文本频率"""
     print("-- COUNT --")
 
+    # 分词
+    word_list = []
     words = raw_txt.split()
+    for word in words:
+        # 大于一个字母的单词才有意义
+        if len(word) > 1:
+            word_list.append(word)
 
     # 停用词表
-    word_list = []
-    for word in words:
-        word_list.append(word)
+    filtered_words = [word for word in word_list if word not in stopwords.words('english')]
 
-    # filtered_words = [word for word in word_list if word not in stopwords.words('english')]
-
+    # 统计
     counts = {}
-    for word in words:
+    for word in filtered_words:
         counts[word] = counts.get(word, 0) + 1
+
+    # 排序
     items = list(counts.items())
     items.sort(key=lambda x: x[1], reverse=True)
-    for i in range(10):
-        word, count = items[i]
-        print("{0:<10}{1:>5}".format(word, count))
 
-    # 打开一个文件
+    # 打印结果 Top N
+    N = 15
+    for i in range(N):
+        word, _count = items[i]
+        print("{0:<10}{1:>5}".format(word, _count))
+
+    # 输出结果到文件
     fo = open("../output/freq.txt", "w", encoding='UTF-8')
-
     for item in items:
         fo.write(str(item) + "\n")
-
-    # 关闭打开的文件
     fo.close()
