@@ -165,3 +165,5 @@ def total_count(str_list):
 
     # 输出结果到文件
     X_train.to_csv("../output/total.csv")
+
+    return X_train
