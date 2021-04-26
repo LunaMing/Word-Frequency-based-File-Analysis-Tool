@@ -66,11 +66,11 @@ def preprocessing(s: str):
     # 停用词
     # Remove stopwords
     keywords = [lemma for lemma in lemmas if lemma not in stopwords.words('english')]
-    print(keywords)
+    # print(keywords)
 
     # 大于一个字母的单词才有意义
     word_list = [keyword for keyword in keywords if len(keyword) > 1]
-    print(word_list)
+    # print(word_list)
 
     # 组装结果
     res = ""
@@ -85,15 +85,10 @@ def count(raw_txt: str):
     print("-- COUNT --")
 
     # 拆分字符串
-    word_list = []
-    words = raw_txt.split()
-    for word in words:
-        word_list.append(word)
+    word_list = raw_txt.split()
 
     # 统计
-    counts = {}
-    for word in word_list:
-        counts[word] = counts.get(word, 0) + 1
+    counts = {word: word_list.count(word) for word in set(word_list)}
 
     # 排序
     items = list(counts.items())
