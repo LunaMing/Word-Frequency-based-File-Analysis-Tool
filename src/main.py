@@ -15,9 +15,9 @@ for index in range(len(pdf_name_list)):
     total_str += s
     total_str_list.append(s)
     # 可视化
-    count(total_str, pdf_name + ".txt")
-    cloud(s, pdf_name + ".png")
+    # count(total_str, pdf_name + ".txt")
+    # cloud(s, pdf_name + ".png")
 
-count(total_str, "total.txt")
+# count(total_str, "total.txt")
 total_count(total_str_list)
-cloud(total_str, "total.png")
+# cloud(total_str, "total.png")
