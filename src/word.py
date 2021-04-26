@@ -84,7 +84,7 @@ def preprocessing(s: str):
     # 只保留“数量大于等于一个的字母或数字”
     tokeniser = RegexpTokenizer(r'\w+')
     tokens = tokeniser.tokenize(s)
-    print(tokens)
+    # print(tokens)
 
     # 词根化
     lemmatiser = WordNetLemmatizer()
@@ -94,7 +94,7 @@ def preprocessing(s: str):
     for tag in tagged_sent:
         wordnet_pos = get_wordnet_pos(tag[1]) or wordnet.NOUN
         lemmas.append(lemmatiser.lemmatize(tag[0], pos=wordnet_pos))
-    print(lemmas)
+    # print(lemmas)
 
     # 停用词
     keywords = [lemma for lemma in lemmas if lemma not in stopwords.words('english')]
