@@ -1,5 +1,11 @@
+import pandas as pd
 import pdftotext
+from nltk import pos_tag
 from nltk.corpus import stopwords
+from nltk.corpus import wordnet
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import RegexpTokenizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def word_deal(pdf_name: str):
@@ -12,7 +18,7 @@ def word_deal(pdf_name: str):
     """
     txt_path = pdf2text(pdf_name)
     raw_str = open(txt_path, 'r', encoding='UTF-8').read()
-    s = preprocessing(raw_str)
+    s = preprocessing_str(raw_str)
     return s
 
 
@@ -43,55 +49,121 @@ def pdf2text(pdf_name: str):
     return txt_path
 
 
-def preprocessing(s: str):
-    """预处理"""
-
-    # 分词
-    word_list = []
-    words = s.split()
-    for word in words:
-        # 大于一个字母的单词才有意义
-        if len(word) > 1:
-            word_list.append(word)
-
-    # 停用词表
-    filtered_words = [word for word in word_list if word not in stopwords.words('english')]
-
+def preprocessing_str(s: str):
+    """预处理，包括组装字符串"""
+    # 预处理
+    word_list = preprocessing(s)
     # 组装结果
     res = ""
-    for w in filtered_words:
+    for w in word_list:
         res = res + " " + w
-
     return res
 
 
-def count(raw_txt: str):
+def get_wordnet_pos(tag):
+    """获取单词的词性"""
+    if tag.startswith('J'):
+        return wordnet.ADJ
+    elif tag.startswith('V'):
+        return wordnet.VERB
+    elif tag.startswith('N'):
+        return wordnet.NOUN
+    elif tag.startswith('R'):
+        return wordnet.ADV
+    else:
+        return None
+
+
+def preprocessing(s: str):
+    """预处理"""
+
+    # 小写
+    s = s.lower()
+
+    # 去标点
+    # 只保留“数量大于等于一个的字母或数字”
+    tokeniser = RegexpTokenizer(r'\w+')
+    tokens = tokeniser.tokenize(s)
+    # print(tokens)
+
+    # 词根化
+    lemmatiser = WordNetLemmatizer()
+    # 获取单词词性
+    tagged_sent = pos_tag(tokens)
+    lemmas = []
+    for tag in tagged_sent:
+        wordnet_pos = get_wordnet_pos(tag[1]) or wordnet.NOUN
+        lemmas.append(lemmatiser.lemmatize(tag[0], pos=wordnet_pos))
+    # print(lemmas)
+
+    # 停用词
+    keywords = [lemma for lemma in lemmas if lemma not in stopwords.words('english')]
+    # print(keywords)
+
+    # 去除纯数字
+    nums = [keyword for keyword in keywords if keyword.isdigit()]
+    # print(nums)
+    letters = [keyword for keyword in keywords if keyword not in nums]
+    # print(letters)
+
+    # 大于一个字母的单词才有意义
+    word_list = [letter for letter in letters if len(letter) > 1]
+    # print(word_list)
+
+    return word_list
+
+
+def count(raw_txt: str, out_file: str):
     """统计文本频率"""
     print("-- COUNT --")
 
     # 拆分字符串
-    word_list = []
-    words = raw_txt.split()
-    for word in words:
-        word_list.append(word)
+    word_list = raw_txt.split()
 
     # 统计
-    counts = {}
-    for word in word_list:
-        counts[word] = counts.get(word, 0) + 1
+    counts = {word: word_list.count(word) for word in set(word_list)}
 
     # 排序
     items = list(counts.items())
     items.sort(key=lambda x: x[1], reverse=True)
 
-    # 打印结果 Top N
-    N = 15
-    for i in range(N):
-        word, _count = items[i]
-        print("{0:<10}{1:>5}".format(word, _count))
+    # 打印topN看一下结果
+    top = items[:5]
+    print(top)
 
     # 输出结果到文件
-    fo = open("../output/freq.txt", "w", encoding='UTF-8')
+    fo = open("../output/" + out_file, "w", encoding='UTF-8')
     for item in items:
         fo.write(str(item) + "\n")
     fo.close()
+
+
+def total_count(str_list):
+    """机器学习统计"""
+    colname = 'nsdi'
+
+    print("-- Create a dataframe --")
+    X_train = pd.DataFrame(str_list, columns=[colname])
+    print(X_train)
+
+    # Create an instance of TfidfVectorizer
+    vectoriser = TfidfVectorizer(analyzer=preprocessing)
+    print("-- Fit to the data and transform to feature matrix --")
+    X_train = vectoriser.fit_transform(X_train[colname])
+    print(X_train)
+
+    print("-- Convert sparse matrix to dataframe --")
+    X_train = pd.DataFrame.sparse.from_spmatrix(X_train)
+    print(X_train)
+
+    # Save mapping on which index refers to which words
+    col_map = {v: k for k, v in vectoriser.vocabulary_.items()}
+    print("--Rename each column using the mapping--")
+    for col in X_train.columns:
+        X_train.rename(columns={col: col_map[col]}, inplace=True)
+    print(X_train)
+
+    # 输出结果到文件
+    X_train.to_csv("../output/total.csv")
+
+    return X_train
