@@ -48,12 +48,13 @@ def pdf2text(pdf_name: str):
 
 
 def preprocessing_str(s: str):
+    """预处理，包括组装字符串"""
+    # 预处理
     word_list = preprocessing(s)
     # 组装结果
     res = ""
     for w in word_list:
         res = res + " " + w
-
     return res
 
 
@@ -80,8 +81,14 @@ def preprocessing(s: str):
     keywords = [lemma for lemma in lemmas if lemma not in stopwords.words('english')]
     # print(keywords)
 
+    # 去除纯数字
+    nums = [keyword for keyword in keywords if keyword.isdigit()]
+    # print(nums)
+    letters = [keyword for keyword in keywords if keyword not in nums]
+    # print(letters)
+
     # 大于一个字母的单词才有意义
-    word_list = [keyword for keyword in keywords if len(keyword) > 1]
+    word_list = [letter for letter in letters if len(letter) > 1]
     # print(word_list)
 
     return word_list
