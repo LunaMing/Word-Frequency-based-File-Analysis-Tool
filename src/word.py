@@ -127,7 +127,9 @@ def count(raw_txt: str, out_file: str):
     items = list(counts.items())
     items.sort(key=lambda x: x[1], reverse=True)
 
-    # print(items)
+    # 打印topN看一下结果
+    top = items[:5]
+    print(top)
 
     # 输出结果到文件
     fo = open("../output/" + out_file, "w", encoding='UTF-8')
