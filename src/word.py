@@ -1,7 +1,9 @@
+import pandas as pd
 import pdftotext
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def word_deal(pdf_name: str):
@@ -14,7 +16,7 @@ def word_deal(pdf_name: str):
     """
     txt_path = pdf2text(pdf_name)
     raw_str = open(txt_path, 'r', encoding='UTF-8').read()
-    s = preprocessing(raw_str)
+    s = preprocessing_str(raw_str)
     return s
 
 
@@ -45,6 +47,16 @@ def pdf2text(pdf_name: str):
     return txt_path
 
 
+def preprocessing_str(s: str):
+    word_list = preprocessing(s)
+    # 组装结果
+    res = ""
+    for w in word_list:
+        res = res + " " + w
+
+    return res
+
+
 def preprocessing(s: str):
     """预处理"""
 
@@ -72,12 +84,7 @@ def preprocessing(s: str):
     word_list = [keyword for keyword in keywords if len(keyword) > 1]
     # print(word_list)
 
-    # 组装结果
-    res = ""
-    for w in word_list:
-        res = res + " " + w
-
-    return res
+    return word_list
 
 
 def count(raw_txt: str, out_file: str):
@@ -94,11 +101,39 @@ def count(raw_txt: str, out_file: str):
     items = list(counts.items())
     items.sort(key=lambda x: x[1], reverse=True)
 
-    # 打印结果 Top N
-    print(items)
+    # print(items)
 
     # 输出结果到文件
     fo = open("../output/" + out_file, "w", encoding='UTF-8')
     for item in items:
         fo.write(str(item) + "\n")
     fo.close()
+
+
+def total_count(str_list):
+    """机器学习统计"""
+    colname = 'nsdi'
+
+    print("-- Create a dataframe --")
+    X_train = pd.DataFrame(str_list, columns=[colname])
+    print(X_train)
+
+    # Create an instance of TfidfVectorizer
+    vectoriser = TfidfVectorizer(analyzer=preprocessing)
+    print("-- Fit to the data and transform to feature matrix --")
+    X_train = vectoriser.fit_transform(X_train[colname])
+    print(X_train)
+
+    print("-- Convert sparse matrix to dataframe --")
+    X_train = pd.DataFrame.sparse.from_spmatrix(X_train)
+    print(X_train)
+
+    # Save mapping on which index refers to which words
+    col_map = {v: k for k, v in vectoriser.vocabulary_.items()}
+    print("--Rename each column using the mapping--")
+    for col in X_train.columns:
+        X_train.rename(columns={col: col_map[col]}, inplace=True)
+    print(X_train)
+
+    # 输出结果到文件
+    X_train.to_csv("../output/total.csv")
