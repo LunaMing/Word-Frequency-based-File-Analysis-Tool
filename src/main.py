@@ -12,6 +12,7 @@ for index in range(len(pdf_name_list)):
     s = word_deal(pdf_name)
     total_str += s
     # 可视化
+    count(total_str, pdf_name + ".txt")
     cloud(s, pdf_name + ".png")
-count(total_str)
+count(total_str, "total.txt")
 cloud(total_str, "total.png")

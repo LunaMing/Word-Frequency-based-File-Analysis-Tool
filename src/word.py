@@ -80,7 +80,7 @@ def preprocessing(s: str):
     return res
 
 
-def count(raw_txt: str):
+def count(raw_txt: str, out_file: str):
     """统计文本频率"""
     print("-- COUNT --")
 
@@ -95,13 +95,10 @@ def count(raw_txt: str):
     items.sort(key=lambda x: x[1], reverse=True)
 
     # 打印结果 Top N
-    N = 15
-    for i in range(N):
-        word, _count = items[i]
-        print("{0:<10}{1:>5}".format(word, _count))
+    print(items)
 
     # 输出结果到文件
-    fo = open("../output/freq.txt", "w", encoding='UTF-8')
+    fo = open("../output/" + out_file, "w", encoding='UTF-8')
     for item in items:
         fo.write(str(item) + "\n")
     fo.close()
