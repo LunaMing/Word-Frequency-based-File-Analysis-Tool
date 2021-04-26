@@ -1,5 +1,6 @@
 import pdftotext
 from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
 
 
@@ -47,6 +48,7 @@ def pdf2text(pdf_name: str):
 def preprocessing(s: str):
     """预处理"""
 
+    # 去标点
     # 只保留“数量大于等于一个的字母或数字”
     # Create an instance of RegexpTokenizer for alphanumeric tokens
     tokeniser = RegexpTokenizer(r'\w+')
@@ -54,9 +56,16 @@ def preprocessing(s: str):
     tokens = tokeniser.tokenize(s)
     # print(tokens)
 
+    # 词根化
+    # Create an instance of WordNetLemmatizer
+    lemmatiser = WordNetLemmatizer()
+    # Lowercase and lemmatise tokens
+    lemmas = [lemmatiser.lemmatize(token.lower(), pos='v') for token in tokens]
+    # print(lemmas)
+
     # 分词
     word_list = []
-    for word in tokens:
+    for word in lemmas:
         # 大于一个字母的单词才有意义
         if len(word) > 1:
             word_list.append(word)
