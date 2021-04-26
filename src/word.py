@@ -1,6 +1,8 @@
 import pandas as pd
 import pdftotext
+from nltk import pos_tag
 from nltk.corpus import stopwords
+from nltk.corpus import wordnet
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -58,26 +60,43 @@ def preprocessing_str(s: str):
     return res
 
 
+def get_wordnet_pos(tag):
+    """获取单词的词性"""
+    if tag.startswith('J'):
+        return wordnet.ADJ
+    elif tag.startswith('V'):
+        return wordnet.VERB
+    elif tag.startswith('N'):
+        return wordnet.NOUN
+    elif tag.startswith('R'):
+        return wordnet.ADV
+    else:
+        return None
+
+
 def preprocessing(s: str):
     """预处理"""
 
+    # 小写
+    s = s.lower()
+
     # 去标点
     # 只保留“数量大于等于一个的字母或数字”
-    # Create an instance of RegexpTokenizer for alphanumeric tokens
     tokeniser = RegexpTokenizer(r'\w+')
-    # Tokenise
     tokens = tokeniser.tokenize(s)
-    # print(tokens)
+    print(tokens)
 
     # 词根化
-    # Create an instance of WordNetLemmatizer
     lemmatiser = WordNetLemmatizer()
-    # Lowercase and lemmatise tokens
-    lemmas = [lemmatiser.lemmatize(token.lower(), pos='v') for token in tokens]
-    # print(lemmas)
+    # 获取单词词性
+    tagged_sent = pos_tag(tokens)
+    lemmas = []
+    for tag in tagged_sent:
+        wordnet_pos = get_wordnet_pos(tag[1]) or wordnet.NOUN
+        lemmas.append(lemmatiser.lemmatize(tag[0], pos=wordnet_pos))
+    print(lemmas)
 
     # 停用词
-    # Remove stopwords
     keywords = [lemma for lemma in lemmas if lemma not in stopwords.words('english')]
     # print(keywords)
 
