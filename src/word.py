@@ -63,19 +63,18 @@ def preprocessing(s: str):
     lemmas = [lemmatiser.lemmatize(token.lower(), pos='v') for token in tokens]
     # print(lemmas)
 
-    # 分词
-    word_list = []
-    for word in lemmas:
-        # 大于一个字母的单词才有意义
-        if len(word) > 1:
-            word_list.append(word)
+    # 停用词
+    # Remove stopwords
+    keywords = [lemma for lemma in lemmas if lemma not in stopwords.words('english')]
+    print(keywords)
 
-    # 停用词表
-    filtered_words = [word for word in word_list if word not in stopwords.words('english')]
+    # 大于一个字母的单词才有意义
+    word_list = [keyword for keyword in keywords if len(keyword) > 1]
+    print(word_list)
 
     # 组装结果
     res = ""
-    for w in filtered_words:
+    for w in word_list:
         res = res + " " + w
 
     return res
