@@ -1,5 +1,6 @@
 import pdftotext
 from nltk.corpus import stopwords
+from nltk.tokenize import RegexpTokenizer
 
 
 def word_deal(pdf_name: str):
@@ -46,10 +47,16 @@ def pdf2text(pdf_name: str):
 def preprocessing(s: str):
     """预处理"""
 
+    # 只保留“数量大于等于一个的字母或数字”
+    # Create an instance of RegexpTokenizer for alphanumeric tokens
+    tokeniser = RegexpTokenizer(r'\w+')
+    # Tokenise
+    tokens = tokeniser.tokenize(s)
+    # print(tokens)
+
     # 分词
     word_list = []
-    words = s.split()
-    for word in words:
+    for word in tokens:
         # 大于一个字母的单词才有意义
         if len(word) > 1:
             word_list.append(word)
