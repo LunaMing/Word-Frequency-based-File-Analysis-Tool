@@ -19,3 +19,4 @@ with driver.session() as session:
     session.read_transaction(print_friends, "Arthur")
 
 driver.close()
+exit()
