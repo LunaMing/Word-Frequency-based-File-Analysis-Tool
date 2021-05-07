@@ -25,7 +25,7 @@ def word_freq():
     data = word.total_count(total_str_list)
     # 可视化
     picture.cloud(total_str, "total.png")
-    picture.plotdata(data)
+    # picture.plotdata(data)
 
 
 # 词频统计
