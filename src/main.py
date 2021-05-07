@@ -29,7 +29,7 @@ def word_freq():
 
 
 # 词频统计
-word_freq()
+# word_freq()
 
 # 可视化 neo4j
 myneo4j.neo4j_driver()
