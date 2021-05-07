@@ -13,16 +13,10 @@ def add_author_write_paper(tx, name, paper_title):
            name=name, paper_title=paper_title)
 
 
-def print_friends(tx, name):
-    for record in tx.run("MATCH (a:Person)-[:KNOWS]->(friend) WHERE a.name = $name "
-                         "RETURN friend.name ORDER BY friend.name", name=name):
-        print(record["friend.name"])
-
-
-def print_author_papers(tx, name):
-    for record in tx.run("MATCH (a:Author)-[:WRITE]->(paper) WHERE a.name = $name "
-                         "RETURN paper.title ORDER BY paper.title", name=name):
-        print(record["paper.title"])
+def print_paper_words(tx, paper_title):
+    for record in tx.run("MATCH (p:Paper)-[c:CONTAIN]->(word) WHERE p.title = $title "
+                         "RETURN c.number, word.name ORDER BY c.number DESC", title=paper_title):
+        print(record['word.name'] + ": " + record['c.number'])
 
 
 def neo4j_driver():
@@ -32,7 +26,7 @@ def neo4j_driver():
         session.write_transaction(add_author_write_paper, "author1", "title1")
         session.write_transaction(add_paper_contain_word, "title1", "word1", "1")
         session.write_transaction(add_paper_contain_word, "title1", "word2", "2")
-        session.read_transaction(print_author_papers, "author1")
+        session.read_transaction(print_paper_words, "title1")
 
     driver.close()
     exit()
