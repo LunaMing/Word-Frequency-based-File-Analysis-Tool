@@ -1,8 +1,5 @@
-from src import picture, word, myneo4j
+from src import picture, word
 
-
-# 爬虫
-# crawl()
 
 def word_freq():
     total_str = ""
@@ -28,8 +25,12 @@ def word_freq():
     # picture.plotdata(data)
 
 
-# 词频统计
-# word_freq()
+if __name__ == '__main__':
+    # 爬虫
+    # crawl()
 
-# 可视化 neo4j
-myneo4j.neo4j_driver()
+    # 词频统计
+    word_freq()
+
+    # 可视化 neo4j
+    # myneo4j.neo4j_driver()
