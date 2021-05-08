@@ -21,7 +21,7 @@ def crawl():
     title_element_list = browser.find_elements_by_class_name("node-title")
     # 文章标题元素数量
     title_len = len(title_element_list)
-    print("num of articles: " + str(title_len))
+    print("num of elements: " + str(title_len))
 
     # 计数
     # 第一个不是链接
@@ -35,36 +35,36 @@ def crawl():
         title = title_element.text
         print("title: " + title)
 
-        while len(browser.window_handles) < 3:
-            # 点击此元素
-            # 使用ctrl+click
-            # 跳转为后台新页面
-            ActionChains(browser) \
-                .key_down(Keys.CONTROL) \
-                .click(title_element) \
-                .key_up(Keys.CONTROL) \
-                .perform()
+        # while len(browser.window_handles) < 3:
+        #     # 点击此元素
+        #     # 使用ctrl+click
+        #     # 跳转为后台新页面
+        #     ActionChains(browser) \
+        #         .key_down(Keys.CONTROL) \
+        #         .click(title_element) \
+        #         .key_up(Keys.CONTROL) \
+        #         .perform()
 
-        # 计算新页面的句柄数
-        # 最后一个句柄就是新打开的页面
-        index_new = len(browser.window_handles) - 1
-        handle_new = browser.window_handles[index_new]
-        # 窗口句柄切换到新页面
-        browser.switch_to.window(handle_new)
+        # # 计算新页面的句柄数
+        # # 最后一个句柄就是新打开的页面
+        # index_new = len(browser.window_handles) - 1
+        # handle_new = browser.window_handles[index_new]
+        # # 窗口句柄切换到新页面
+        # browser.switch_to.window(handle_new)
 
-        # 等待新页面加载完毕
-        try:
-            element = WebDriverWait(browser, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "file"))
-            )
-
-            file_text = element.text
-            print(file_text)
-        finally:
-            browser.close()
-
-        # 窗口句柄切换回到目录页面
-        browser.switch_to.window(handle_old)
+        # # 等待新页面加载完毕
+        # try:
+        #     element = WebDriverWait(browser, 10).until(
+        #         EC.presence_of_element_located((By.CLASS_NAME, "file"))
+        #     )
+        #
+        #     file_text = element.text
+        #     print(file_text)
+        # finally:
+        #     browser.close()
+        #
+        # # 窗口句柄切换回到目录页面
+        # browser.switch_to.window(handle_old)
 
         # 计数+1
         count += 1
@@ -75,3 +75,4 @@ def crawl():
 
 if __name__ == '__main__':
     crawl()
+    exit()
