@@ -1,4 +1,9 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+options = Options()
+# 静默模式
+options.add_argument('--headless')
 
 # 所有论文详情页面的url列表
 paper_url_list = []
@@ -13,7 +18,7 @@ class Paper:
 
 
 def get_paper_urls(url):
-    browser = webdriver.Chrome()
+    browser = webdriver.Chrome(options=options)
     browser.get(url)
 
     # 获取文章标题元素
@@ -33,7 +38,7 @@ def paper_spider():
     for paper_url in paper_url_list:
         print(paper_url)
         paper_title = get_paper_title(paper_url)
-        print("title->"+paper_title)
+        print("title->" + paper_title)
         paper = Paper()
         paper.title = paper_title
         paper_list.append(paper)
@@ -41,7 +46,13 @@ def paper_spider():
 
 def get_paper_title(paper_url):
     # todo 爬虫获取title
+    browser = webdriver.Chrome(options=options)
+    browser.get(paper_url)
+
     title = "title1"
+
+    # 退出整个浏览器
+    browser.quit()
     return title
 
 
