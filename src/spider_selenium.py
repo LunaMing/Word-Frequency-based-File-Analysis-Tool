@@ -2,6 +2,14 @@ from selenium import webdriver
 
 # 所有论文详情页面的url列表
 paper_url_list = []
+# 所有论文列表
+paper_list = []
+
+
+class Paper:
+    title = ""
+    abstract = ""
+    author = ""
 
 
 def get_paper_urls(url):
@@ -22,13 +30,24 @@ def get_paper_urls(url):
 
 
 def paper_spider():
-    print("-- paper spider --")
     for paper_url in paper_url_list:
         print(paper_url)
+        paper_title = get_paper_title(paper_url)
+        print("title->"+paper_title)
+        paper = Paper()
+        paper.title = paper_title
+        paper_list.append(paper)
+
+
+def get_paper_title(paper_url):
+    # todo 爬虫获取title
+    title = "title1"
+    return title
 
 
 if __name__ == '__main__':
     start_url = 'https://www.usenix.org/conference/nsdi20/accepted-papers'
     get_paper_urls(start_url)
     paper_spider()
+    print(paper_list[0].title)
     exit()
