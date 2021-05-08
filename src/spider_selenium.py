@@ -4,11 +4,8 @@ from selenium import webdriver
 paper_url_list = []
 
 
-def crawl():
+def get_paper_urls(url):
     browser = webdriver.Chrome()
-    # 准备网址
-    url = 'https://www.usenix.org/conference/nsdi20/accepted-papers'
-    # 访问网址
     browser.get(url)
 
     # 获取文章标题元素
@@ -31,6 +28,7 @@ def paper_spider():
 
 
 if __name__ == '__main__':
-    crawl()
+    start_url = 'https://www.usenix.org/conference/nsdi20/accepted-papers'
+    get_paper_urls(start_url)
     paper_spider()
     exit()
