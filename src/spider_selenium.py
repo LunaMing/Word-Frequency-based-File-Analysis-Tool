@@ -71,3 +71,7 @@ def crawl():
 
     # 退出整个浏览器
     browser.quit()
+
+
+if __name__ == '__main__':
+    crawl()
