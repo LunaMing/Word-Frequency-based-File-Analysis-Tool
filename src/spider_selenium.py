@@ -38,7 +38,7 @@ def paper_spider():
     for paper_url in paper_url_list:
         print(paper_url)
         paper_title = get_paper_title(paper_url)
-        print("title->" + paper_title)
+        # print("title->" + paper_title)
         paper = Paper()
         paper.title = paper_title
         paper_list.append(paper)
@@ -49,7 +49,8 @@ def get_paper_title(paper_url):
     browser = webdriver.Chrome(options=options)
     browser.get(paper_url)
 
-    title = "title1"
+    title_element = browser.find_element_by_xpath('//*[@id="page-title"]')
+    title = title_element.text
 
     # 退出整个浏览器
     browser.quit()
@@ -60,5 +61,6 @@ if __name__ == '__main__':
     start_url = 'https://www.usenix.org/conference/nsdi20/accepted-papers'
     get_paper_urls(start_url)
     paper_spider()
-    print(paper_list[0].title)
+    for paper in paper_list:
+        print(paper.title)
     exit()
