@@ -29,12 +29,14 @@ def get_paper_urls(url):
     browser.quit()
 
 
-def paper_spider():
+def paper_spider(debug=False):
     # 启动浏览器
     browser = webdriver.Chrome(options=options)
 
     i = 0
     for paper_url in paper_url_list:
+        if debug and i > 3:
+            break
         print("-- start get paper " + str(i) + " ...")
         get_paper_info(browser, paper_url)
         i += 1
@@ -58,8 +60,8 @@ def get_paper_info(browser, paper_url):
 
     # 合成论文对象，放入总列表
     paper = {
-        "title": title,
-        "author": author_school,
+        "Title": title,
+        "Author": author_school,
     }
     paper_list.append(paper)
 
@@ -67,16 +69,19 @@ def get_paper_info(browser, paper_url):
 if __name__ == '__main__':
     start_url = 'https://www.usenix.org/conference/nsdi20/accepted-papers'
     get_paper_urls(start_url)
-    paper_spider()
+
+    paper_spider(debug=True)
 
     # 输出结果到文件
-    fo = open("../output/paper_info.csv", "w", encoding='UTF-8')
+    import csv
 
-    for p in paper_list:
-        # json_data = json.dumps(p)
-        # fo.write(json_data)
-        fo.write("title: " + p["title"] + "\n")
-
-    fo.close()
+    csv_file_path = "../output/paper_info.csv"
+    csv_columns = ['Title', 'Author']
+    dict_data = paper_list
+    with open(csv_file_path, 'w', encoding='UTF-8') as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=csv_columns)
+        writer.writeheader()
+        for data in dict_data:
+            writer.writerow(data)
 
     exit()
