@@ -27,14 +27,12 @@ def paper_spider(browser, paper_urls, debug=False):
     # 所有论文列表
     papers = []
 
-    i = 0
-    for paper_url in paper_urls:
-        if debug and i > 3:
-            break
+    for i in range(len(paper_urls)):
+        if debug and i < 60:
+            continue
         print("-- start get paper " + str(i) + " ...")
-        paper = get_paper_info(browser, paper_url)
+        paper = get_paper_info(browser, paper_urls[i])
         papers.append(paper)
-        i += 1
 
     return papers
 
@@ -131,7 +129,7 @@ if __name__ == '__main__':
 
     # 每篇论文爬取具体信息
     # debug的时候只爬前几个论文
-    paper_list = paper_spider(chrome, paper_url_list, debug=False)
+    paper_list = paper_spider(chrome, paper_url_list, debug=True)
 
     # 输出结果到文件
     output_csv(paper_list)
