@@ -57,6 +57,9 @@ def text_remove_useless(text):
     for i in range(len(authors)):
         authors[i] = authors[i].strip()
 
+    # 去除只有空字符的
+    authors = [author for author in authors if len(author) > 0]
+
     return authors
 
 
