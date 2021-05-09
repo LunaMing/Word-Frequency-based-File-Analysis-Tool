@@ -35,17 +35,19 @@ def get_paper_urls(url):
 
 
 def paper_spider():
+    browser = webdriver.Chrome(options=options)
+
     i = 0
     for paper_url in paper_url_list:
         print("-- start get paper " + str(i) + " ...")
-        get_paper_info(paper_url)
+        get_paper_info(browser, paper_url)
         i += 1
 
+    browser.quit()
 
-def get_paper_info(paper_url):
+
+def get_paper_info(browser, paper_url):
     print(paper_url)
-
-    browser = webdriver.Chrome(options=options)
     browser.get(paper_url)
 
     # 获取论文标题
@@ -62,9 +64,6 @@ def get_paper_info(paper_url):
     p.title = title
     p.author = author_school
     paper_list.append(p)
-
-    # 退出整个浏览器
-    browser.quit()
 
 
 if __name__ == '__main__':
