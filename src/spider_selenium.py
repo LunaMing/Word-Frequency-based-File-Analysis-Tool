@@ -28,7 +28,7 @@ def paper_spider(browser, paper_urls, debug=False):
     papers = []
 
     for i in range(len(paper_urls)):
-        if debug and i < 60:
+        if debug and i < 61:
             continue
         print("-- start get paper " + str(i) + " ...")
         paper = get_paper_info(browser, paper_urls[i])
@@ -76,7 +76,8 @@ def get_paper_info(browser, paper_url):
     author_school = author_element_list[1]
 
     # 获取斜体字的学校名称
-    ems = author_school.find_elements_by_xpath('//em')
+    ems = author_school.find_elements_by_xpath(
+        '/html/body/div[2]/main/section/div[3]/article/div/div[1]/div[2]/div/p/em')
     school_text = ""
     for em in ems:
         school_text += em.text
@@ -129,7 +130,7 @@ if __name__ == '__main__':
 
     # 每篇论文爬取具体信息
     # debug的时候只爬前几个论文
-    paper_list = paper_spider(chrome, paper_url_list, debug=True)
+    paper_list = paper_spider(chrome, paper_url_list, debug=False)
 
     # 输出结果到文件
     output_csv(paper_list)
