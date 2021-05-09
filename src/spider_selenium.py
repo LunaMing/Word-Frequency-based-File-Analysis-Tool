@@ -131,7 +131,7 @@ if __name__ == '__main__':
 
     # 每篇论文爬取具体信息
     # debug的时候只爬前几个论文
-    paper_list = paper_spider(chrome, paper_url_list, debug=True)
+    paper_list = paper_spider(chrome, paper_url_list, debug=False)
 
     # 输出结果到文件
     output_csv(paper_list)
