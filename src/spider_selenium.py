@@ -52,7 +52,14 @@ def get_paper_info(browser, paper_url):
     author_element_list = browser.find_elements_by_xpath(
         '//*[@class="field field-name-field-paper-people-text field-type-text-long field-label-above"]/div')
     author_school = author_element_list[1]
+
+    ems = author_school.find_elements_by_xpath('//em')
+    print(len(ems))
+    for em in ems:
+        print(em.text)
+
     author_text = author_school.text
+
     # 分割逗号和分号
     authors = re.split('[,;]', author_text)
 
