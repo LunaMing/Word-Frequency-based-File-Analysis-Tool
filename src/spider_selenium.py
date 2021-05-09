@@ -77,6 +77,7 @@ def get_paper_info(browser, paper_url):
         '//*[@class="field field-name-field-paper-people-text field-type-text-long field-label-above"]/div')
     author_school = author_element_list[1]
 
+    # 获取斜体字的学校名称
     ems = author_school.find_elements_by_xpath('//em')
     school_text = ""
     for em in ems:
@@ -84,6 +85,7 @@ def get_paper_info(browser, paper_url):
         school_text += " , "
     schools = text_remove_useless(school_text)
 
+    # 获取作者和学校混杂
     author_text = author_school.text
     authors = text_remove_useless(author_text)
 
