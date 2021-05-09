@@ -92,18 +92,24 @@ def get_paper_info(browser, paper_url):
     # 去除学校只保留作者名
     authors = [author for author in authors if author not in schools]
 
+    # 获取论文摘要
+    element_list = browser.find_elements_by_xpath(
+        '//*[@class="field field-name-field-paper-description field-type-text-long field-label-above"]/div')
+    abstract = element_list[1].text
+
     # 合成论文对象
     paper = {
         "Title": title,
         "Author": authors,
-        "School": schools
+        "School": schools,
+        "Abstract": abstract
     }
     return paper
 
 
 def output_csv(dict_data):
     csv_file_path = "../output/paper_info.csv"
-    csv_columns = ['Title', 'Author', 'School']
+    csv_columns = ['Title', 'Author', 'School', 'Abstract']
     with open(csv_file_path, 'w', encoding='UTF-8', newline='') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=csv_columns)
         writer.writeheader()
