@@ -55,6 +55,17 @@ def get_paper_info(browser, paper_url):
     author_text = author_school.text
     # 分割逗号和分号
     authors = re.split('[,;]', author_text)
+
+    # 去掉“and ”分割
+    for i in range(len(authors)):
+        old_a = authors[i]
+        new_a_list = old_a.split("and ")
+        if len(new_a_list) == 2:
+            authors.remove(old_a)
+            for new_a in new_a_list:
+                if len(new_a) > 1:
+                    authors.insert(i, new_a)
+
     # 去掉两边的空格
     for i in range(len(authors)):
         authors[i] = authors[i].strip()
