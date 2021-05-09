@@ -43,12 +43,18 @@ def paper_spider():
 
 
 def get_paper_title(paper_url):
-    # todo 爬虫获取title
     browser = webdriver.Chrome(options=options)
     browser.get(paper_url)
 
+    # 获取论文标题
     title_element = browser.find_element_by_xpath('//*[@id="page-title"]')
     title = title_element.text
+
+    # 获取论文作者
+    author_element_list = browser.find_elements_by_xpath(
+        '//*[@class="field field-name-field-paper-people-text field-type-text-long field-label-above"]/div')
+    author_school = author_element_list[1]
+    print(author_school.text)
 
     # 退出整个浏览器
     browser.quit()
