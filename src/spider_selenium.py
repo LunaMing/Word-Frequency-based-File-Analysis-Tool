@@ -78,7 +78,7 @@ if __name__ == '__main__':
     csv_file_path = "../output/paper_info.csv"
     csv_columns = ['Title', 'Author']
     dict_data = paper_list
-    with open(csv_file_path, 'w', encoding='UTF-8') as csv_file:
+    with open(csv_file_path, 'w', encoding='UTF-8', newline='') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=csv_columns)
         writer.writeheader()
         for data in dict_data:
