@@ -1,4 +1,5 @@
 import csv
+import re
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -52,11 +53,16 @@ def get_paper_info(browser, paper_url):
         '//*[@class="field field-name-field-paper-people-text field-type-text-long field-label-above"]/div')
     author_school = author_element_list[1]
     author_text = author_school.text
+    # 分割逗号和分号
+    authors = re.split('[,;]', author_text)
+    # 去掉两边的空格
+    for i in range(len(authors)):
+        authors[i] = authors[i].strip()
 
     # 合成论文对象
     paper = {
         "Title": title,
-        "Author": author_text,
+        "Author": authors,
     }
     return paper
 
