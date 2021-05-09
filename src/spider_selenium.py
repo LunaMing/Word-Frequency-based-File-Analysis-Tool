@@ -33,7 +33,7 @@ def get_paper_urls(url):
 
 def paper_spider(paper_urls, debug=False):
     # 所有论文列表
-    paper_list = []
+    papers = []
     # 启动浏览器
     browser = webdriver.Chrome(options=options)
 
@@ -43,13 +43,13 @@ def paper_spider(paper_urls, debug=False):
             break
         print("-- start get paper " + str(i) + " ...")
         paper = get_paper_info(browser, paper_url)
-        paper_list.append(paper)
+        papers.append(paper)
         i += 1
 
     # 退出整个浏览器
     browser.quit()
 
-    return paper_list
+    return papers
 
 
 def get_paper_info(browser, paper_url):
