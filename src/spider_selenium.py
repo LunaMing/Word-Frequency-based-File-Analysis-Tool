@@ -104,7 +104,7 @@ def get_paper_info(browser, paper_url):
 def output_csv(dict_data):
     csv_file_path = "../output/paper_info.csv"
     csv_columns = ['Title', 'Author', 'School']
-    with open(csv_file_path, 'w', newline='') as csv_file:
+    with open(csv_file_path, 'w', encoding='UTF-8', newline='') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=csv_columns)
         writer.writeheader()
         for data in dict_data:
@@ -125,7 +125,7 @@ if __name__ == '__main__':
 
     # 每篇论文爬取具体信息
     # debug的时候只爬前几个论文
-    paper_list = paper_spider(chrome, paper_url_list, debug=True)
+    paper_list = paper_spider(chrome, paper_url_list, debug=False)
 
     # 输出结果到文件
     output_csv(paper_list)
