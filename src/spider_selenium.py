@@ -51,11 +51,12 @@ def get_paper_info(browser, paper_url):
     author_element_list = browser.find_elements_by_xpath(
         '//*[@class="field field-name-field-paper-people-text field-type-text-long field-label-above"]/div')
     author_school = author_element_list[1]
+    author_text = author_school.text
 
     # 合成论文对象
     paper = {
         "Title": title,
-        "Author": author_school,
+        "Author": author_text,
     }
     return paper
 
