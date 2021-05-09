@@ -37,11 +37,9 @@ def get_paper_urls(url):
 def paper_spider():
     for paper_url in paper_url_list:
         print(paper_url)
-        paper_title = get_paper_title(paper_url)
-        # print("title->" + paper_title)
-        paper = Paper()
-        paper.title = paper_title
-        paper_list.append(paper)
+        p = Paper()
+        p.title = get_paper_title(paper_url)
+        paper_list.append(p)
 
 
 def get_paper_title(paper_url):
