@@ -88,6 +88,9 @@ def get_paper_info(browser, paper_url):
     # 获取作者和学校混杂
     author_text = author_school.text
     authors = text_remove_useless(author_text)
+    # todo 建立学校和作者之间的关系：学校前面【到另一个学校名之间】的作者就属于后一个学校
+    # 去除学校只保留作者名
+    authors = [author for author in authors if author not in schools]
 
     # 合成论文对象
     paper = {
