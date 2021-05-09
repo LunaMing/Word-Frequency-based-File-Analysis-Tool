@@ -39,29 +39,9 @@ def paper_spider(browser, paper_urls, debug=False):
     return papers
 
 
-def get_paper_info(browser, paper_url):
-    print(paper_url)
-    # 打开网页
-    browser.get(paper_url)
-
-    # 获取论文标题
-    title_element = browser.find_element_by_xpath('//*[@id="page-title"]')
-    title = title_element.text
-
-    # 获取论文作者
-    author_element_list = browser.find_elements_by_xpath(
-        '//*[@class="field field-name-field-paper-people-text field-type-text-long field-label-above"]/div')
-    author_school = author_element_list[1]
-
-    ems = author_school.find_elements_by_xpath('//em')
-    print(len(ems))
-    for em in ems:
-        print(em.text)
-
-    author_text = author_school.text
-
+def text_remove_useless(text):
     # 分割逗号和分号
-    authors = re.split('[,;]', author_text)
+    authors = re.split('[,;]', text)
 
     # 去掉“and ”分割
     for i in range(len(authors)):
@@ -77,17 +57,45 @@ def get_paper_info(browser, paper_url):
     for i in range(len(authors)):
         authors[i] = authors[i].strip()
 
+    return authors
+
+
+def get_paper_info(browser, paper_url):
+    print(paper_url)
+    # 打开网页
+    browser.get(paper_url)
+
+    # 获取论文标题
+    title_element = browser.find_element_by_xpath('//*[@id="page-title"]')
+    title = title_element.text
+
+    # 获取论文作者
+    author_element_list = browser.find_elements_by_xpath(
+        '//*[@class="field field-name-field-paper-people-text field-type-text-long field-label-above"]/div')
+    author_school = author_element_list[1]
+
+    ems = author_school.find_elements_by_xpath('//em')
+    school_text = ""
+    for em in ems:
+        school_text += em.text
+        school_text += " , "
+    schools = text_remove_useless(school_text)
+
+    author_text = author_school.text
+    authors = text_remove_useless(author_text)
+
     # 合成论文对象
     paper = {
         "Title": title,
         "Author": authors,
+        "School": schools
     }
     return paper
 
 
 def output_csv(dict_data):
     csv_file_path = "../output/paper_info.csv"
-    csv_columns = ['Title', 'Author']
+    csv_columns = ['Title', 'Author', 'School']
     with open(csv_file_path, 'w', encoding='UTF-8', newline='') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=csv_columns)
         writer.writeheader()
