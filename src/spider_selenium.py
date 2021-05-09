@@ -35,14 +35,16 @@ def get_paper_urls(url):
 
 
 def paper_spider():
+    i = 0
     for paper_url in paper_url_list:
-        print(paper_url)
-        p = Paper()
-        p.title = get_paper_title(paper_url)
-        paper_list.append(p)
+        print("-- start get paper " + str(i) + " ...")
+        get_paper_info(paper_url)
+        i += 1
 
 
-def get_paper_title(paper_url):
+def get_paper_info(paper_url):
+    print(paper_url)
+
     browser = webdriver.Chrome(options=options)
     browser.get(paper_url)
 
@@ -54,11 +56,15 @@ def get_paper_title(paper_url):
     author_element_list = browser.find_elements_by_xpath(
         '//*[@class="field field-name-field-paper-people-text field-type-text-long field-label-above"]/div')
     author_school = author_element_list[1]
-    print(author_school.text)
+
+    # 合成论文类，放入总列表
+    p = Paper()
+    p.title = title
+    p.author = author_school
+    paper_list.append(p)
 
     # 退出整个浏览器
     browser.quit()
-    return title
 
 
 if __name__ == '__main__':
