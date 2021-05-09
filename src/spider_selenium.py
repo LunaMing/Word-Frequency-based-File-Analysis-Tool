@@ -3,39 +3,28 @@ import csv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-options = Options()
-# 静默模式
-options.add_argument('--headless')
 
-
-def get_paper_urls(url):
-    # 所有论文详情页面的url列表
-    paper_urls = []
-
-    # 启动浏览器
-    browser = webdriver.Chrome(options=options)
+def get_paper_urls(browser, url):
+    # 打开网页
     browser.get(url)
 
     # 获取文章标题元素
     title_element_list = browser.find_elements_by_xpath('//*[@class="node-title"]/a')
     print("num of elements: " + str(len(title_element_list)))
 
-    # 保存到总的url列表
+    # 所有论文详情页面的url列表
+    paper_urls = []
+    # 保存
     for title_element in title_element_list:
         paper_url = title_element.get_attribute('href')
         paper_urls.append(paper_url)
 
-    # 退出整个浏览器
-    browser.quit()
-
     return paper_urls
 
 
-def paper_spider(paper_urls, debug=False):
+def paper_spider(browser, paper_urls, debug=False):
     # 所有论文列表
     papers = []
-    # 启动浏览器
-    browser = webdriver.Chrome(options=options)
 
     i = 0
     for paper_url in paper_urls:
@@ -46,14 +35,12 @@ def paper_spider(paper_urls, debug=False):
         papers.append(paper)
         i += 1
 
-    # 退出整个浏览器
-    browser.quit()
-
     return papers
 
 
 def get_paper_info(browser, paper_url):
     print(paper_url)
+    # 打开网页
     browser.get(paper_url)
 
     # 获取论文标题
@@ -84,16 +71,25 @@ def output_csv(dict_data):
 
 
 if __name__ == '__main__':
-    start_url = 'https://www.usenix.org/conference/nsdi20/accepted-papers'
+    # 准备浏览器设置
+    options = Options()
+    # 静默模式
+    options.add_argument('--headless')
+    # 启动浏览器
+    chrome = webdriver.Chrome(options=options)
 
     # 从总会议网址出发，获取论文的所有url
-    paper_url_list = get_paper_urls(start_url)
+    start_url = 'https://www.usenix.org/conference/nsdi20/accepted-papers'
+    paper_url_list = get_paper_urls(chrome, start_url)
 
     # 每篇论文爬取具体信息
     # debug的时候只爬前几个论文
-    paper_list = paper_spider(paper_url_list, debug=True)
+    paper_list = paper_spider(chrome, paper_url_list, debug=True)
 
     # 输出结果到文件
     output_csv(paper_list)
+
+    # 退出整个浏览器
+    chrome.quit()
 
     exit()
