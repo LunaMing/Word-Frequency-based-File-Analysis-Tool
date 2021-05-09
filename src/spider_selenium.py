@@ -1,3 +1,5 @@
+import csv
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
@@ -66,15 +68,7 @@ def get_paper_info(browser, paper_url):
     paper_list.append(paper)
 
 
-if __name__ == '__main__':
-    start_url = 'https://www.usenix.org/conference/nsdi20/accepted-papers'
-    get_paper_urls(start_url)
-
-    paper_spider(debug=True)
-
-    # 输出结果到文件
-    import csv
-
+def output_csv():
     csv_file_path = "../output/paper_info.csv"
     csv_columns = ['Title', 'Author']
     dict_data = paper_list
@@ -83,5 +77,19 @@ if __name__ == '__main__':
         writer.writeheader()
         for data in dict_data:
             writer.writerow(data)
+
+
+if __name__ == '__main__':
+    start_url = 'https://www.usenix.org/conference/nsdi20/accepted-papers'
+
+    # 从总会议网址出发，获取论文的所有url
+    get_paper_urls(start_url)
+
+    # 每篇论文爬取具体信息
+    # debug的时候只爬前几个论文
+    paper_spider(debug=True)
+
+    # 输出结果到文件
+    output_csv()
 
     exit()
