@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Word Frequency File Analysis System</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'graph/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css">
+</head>
+<body id="body">
+
+<div id="header">
+    <img style="float: left" src="{% static 'graph/icons/logo_icon.png' %}" alt="icon logo" width="37" height="48">
+    <h3>Word Frequency File Analysis System</h3>
+</div>
+
+<div id="left">
+    <i style="padding: 10px" class="fa fa-upload"></i> Upload<br>
+    <img src="{% static 'graph/icons/pdf.png' %}" alt="icon pdf" width="28" height="28"> PDF File 1 <br>
+    <img src="{% static 'graph/icons/pdf.png' %}" alt="icon pdf" width="28" height="28"> PDF File 2 <br>
+</div>
+
+<div id="right">
+    <div id="graph">
+        <h1>Graph</h1>
+        <p>
+            (Neo4j TODO)
+        </p>
+    </div>
+
+    <div id="word_cloud">
+        <h2>Word Cloud</h2>
+        <img src="{% static 'graph/images/nsdi20spring_arashloo_prepub.png' %}" alt="word cloud 1">
+    </div>
+</div>
+
+</body>
+</html>
+
