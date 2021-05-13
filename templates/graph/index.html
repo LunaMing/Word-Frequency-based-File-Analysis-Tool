@@ -72,24 +72,6 @@
                     position: 'right',//提示框浮层的位置，默认不设置时位置会跟随鼠标的位置。只在 trigger 为'item'的时候有效。
                     confine: false,//是否将 tooltip 框限制在图表的区域内。外层的 dom 被设置为 'overflow: hidden'，或者移动端窄屏，导致 tooltip 超出外界被截断时，此配置比较有用。
                     transitionDuration: 0.4,//提示框浮层的移动动画过渡时间，单位是 s，设置为 0 的时候会紧跟着鼠标移动。
-                    formatter: function (params, ticket, callback) {
-                        //判断数据，提供相应的url。
-                        var path = "";
-                        var node = params.data; //当前选中节点数据
-                        var category = params.data.category;  //选中节点图例0负载 1中间件 2端口号 3数据库 4用户名
-                        if (category == 2) { //为jvm 虚拟机各类参数的路径
-                            path = "${ctx}/weblogic.do?host=" + node.host + "&port="
-                                + node.port + "&username=" + node.username
-                                + "&pwd=" + node.pwd; //准备访问路径
-                        } else if (category == 4) { //为jdbc 数据库的路径
-                            path = "${ctx}/oracle.do?host=" + node.host + "&port="
-                                + node.port + "&username=" + node.username
-                                + "&pwd=" + node.pwd + "&instance="
-                                + node.instance; //准备访问路径
-                        }
-
-                        console.log(params);
-                    }
                 },
 
                 legend: { //=========圖表控件
