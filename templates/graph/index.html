@@ -116,31 +116,20 @@
                 legend: { //=========圖表控件
                     show: true,
                     data: [{
-                        name: '负载',
-
-                        icon: 'rect'//'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'
-
-                    },
-                        {
-                            name: '中间件',
-
-                            icon: 'roundRect'
-                        }, {
-                            name: '端口号',
-
-                            icon: 'circle'
-                        }, {
-                            name: '数据库',
-
-                            icon: 'circle'
-                        }, {
-                            name: '用户名',
-                            icon: 'roundRect'
-                        }]
+                        name: 'Author',
+                        icon: 'rect'
+                        //'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'
+                    }, {
+                        name: 'Paper',
+                        icon: 'roundRect'
+                    }, {
+                        name: 'Word',
+                        icon: 'circle'
+                    }]
                 },
                 series: [{
                     type: 'graph', //关系图
-                    name: "监控管理系统", //系列名称，用于tooltip的显示，legend 的图例筛选，在 setOption 更新数据和配置项时用于指定对应的系列。
+                    name: "图谱", //系列名称，用于tooltip的显示，legend 的图例筛选，在 setOption 更新数据和配置项时用于指定对应的系列。
                     layout: 'force', //图的布局，类型为力导图，'circular' 采用环形布局，见示例 Les Miserables
                     legendHoverLink: true,//是否启用图例 hover(悬停) 时的联动高亮。
                     hoverAnimation: true,//是否开启鼠标悬停节点的显示动画
@@ -223,14 +212,14 @@
                     data: [{
                         id: 0,
                         category: 0,
-                        name: '101.133.8.88',
+                        name: 'Mina Tahmasbi Arashloo',
                         symbol: 'roundRect',
                         value: 20,
                         symbolSize: 80
                     }, {
                         id: 1,
                         category: 1,
-                        name: '192.168.8.88',
+                        name: 'Title 3',
                         symbol: 'rect',
                         value: 20,
                         symbolSize: 70
@@ -256,7 +245,7 @@
                     }, {
                         id: 4,
                         category: 1,
-                        name: '102.12.33.23',
+                        name: 'Title 2',
                         symbol: 'rect',
                         value: 20,
                         symbolSize: 70
@@ -284,7 +273,7 @@
                     }, {
                         id: 8,
                         category: 1,
-                        name: '101.11.66.6',
+                        name: 'Title 1',
                         symbol: 'rect',
                         value: 20,
                         symbolSize: 70
@@ -316,59 +305,19 @@
                         symbol: 'circle',
                         value: 20,
                         symbolSize: 60
-                    }, {
-                        id: 13,
-                        category: 3,
-                        name: '192.168.44.44',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 70
-                    }, {
-                        id: 14,
-                        category: 3,
-                        name: '192.168.33.33',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 70
-                    }, {
-                        id: 15,
-                        category: 3,
-                        name: '192.168.22.22',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 70
-                    }, {
-                        id: 16,
-                        category: 4,
-                        name: '55555555555',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 70,
-                        yId: "jdbc",
-                        port: "1521",
-                        host: "192.168.11.11",
-                        username: "222222222",
-                        pwd: "11111111",
-                        instance: "orcl"
                     }],
                     categories: [ //symbol name：用于和 legend 对应以及格式化 tooltip 的内容。 label有效
                         {
-                            name: '负载',
+                            name: 'Author',
                             symbol: 'rect',
                             label: { //标签样式
                             }
                         }, {
-                            name: '中间件',
-                            symbol: 'rect'
-                        }, {
-                            name: '端口号',
+                            name: 'Paper',
                             symbol: 'roundRect'
                         }, {
-                            name: '数据库',
-                            symbol: 'roundRect'
-                        }, {
-                            name: '用户名',
-                            symbol: 'roundRect'
+                            name: 'Word',
+                            symbol: 'Circle'
                         }],
                     links: [ //edges是其别名代表节点间的关系数据。
                         {
@@ -407,18 +356,6 @@
                         }, {
                             source: 12,
                             target: 8
-                        }, {
-                            source: 13,
-                            target: 6
-                        }, {
-                            source: 14,
-                            target: 6
-                        }, {
-                            source: 15,
-                            target: 2
-                        }, {
-                            source: 16,
-                            target: 15
                         }]
                 }]
             };
