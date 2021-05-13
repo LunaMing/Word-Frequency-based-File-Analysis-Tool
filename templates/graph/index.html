@@ -47,7 +47,8 @@
          alt="icon pdf" width="40" height="40">
     {{ title_1 }}<br>
     <br>
-    <a href="#" class="button" id="start_btn" onclick="alert('click')">Start ></a>
+    <a href="#" class="button" id="start_btn" onclick="alert('TODO')">Start ></a>
+    <a href="#" class="button" id="start_btn" onclick="refreshData(null)">Clear Graph</a>
 </div>
 
 <div id="right">
@@ -277,7 +278,17 @@
 
             //var ecConfig = echarts.config; echarts2的获取事件方法，当前为echarts 3
             myChart.on('mouseover', openOrFold);
+
             //'click'、'dblclick'、'mousedown'、'mousemove'、'mouseup'、'mouseover'、'mouseout'
+
+
+            function refreshData(data) {
+                //刷新数据
+                var option = myChart.getOption();
+                option.series[0].data = data;
+                myChart.setOption(option);
+            }
+
             /*ECharts3 方法部分 结束*/
 
             /*ECharts3 结束*/
