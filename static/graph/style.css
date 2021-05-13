@@ -1,0 +1,24 @@
+#header {
+    color: #003144;
+    text-align: left;
+    background-color: white;
+    padding-left: 20px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#left {
+    width: 20%;
+    height: 287px;
+    float: left;
+    padding: 5px;
+}
+
+#right {
+    float: right;
+    width: 75%;
+}
+
+#body {
+    background-color: #F9F9FB;
+}
