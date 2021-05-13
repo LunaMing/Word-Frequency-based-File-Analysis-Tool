@@ -9,6 +9,4 @@ urlpatterns = [
     path('getAllPersons', getAllPersons),
     path('city', cityDetails),
     path('getAllCities', getAllCities),
-    path('connectPaC', connectPaC),
-    path('connectPaP', connectPaP)
 ]
