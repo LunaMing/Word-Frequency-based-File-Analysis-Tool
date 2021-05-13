@@ -5,8 +5,12 @@
     <title>Word Frequency File Analysis System</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'graph/style.css' %}">
+    <!--icon-->
     <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css">
+    <!--echarts-->
     <script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+    <!-- 引入主题 -->
+    <script src="https://www.runoob.com/static/js/wonderland.js"></script>
     <style>
         .button {
             background-color: #09A9E6;
@@ -49,7 +53,14 @@
             // 基于准备好的dom，初始化ECharts实例
             var myChart = echarts.init(document.getElementById('main'), 'macarons');            // 指定图表的配置项和数据
             var option = {
-                tooltip: {
+                // 全局调色盘。
+                "color": [
+                    "#59c4e6",
+                    "#edafda",
+                    "#93b7e3",
+                    "#a5e7f0",
+                    "#cbb0e3"
+                ], tooltip: {
                     show: true,   //默认显示
                     showContent: true, //是否显示提示框浮层
                     trigger: 'item',//触发类型，默认数据项触发
@@ -129,6 +140,7 @@
                             label: {
                                 show: true
                             },
+                            opacity: 0.95
                         },
                         emphasis: {//高亮状态
                             borderType: 'solid', //图形描边类型，默认为实线，支持 'solid'（实线）, 'dashed'(虚线), 'dotted'（点线）。
@@ -281,10 +293,16 @@
                             },
                         }, {
                             name: 'Paper',
-                            symbol: 'roundRect'
+                            symbol: 'roundRect',
+                            label: { //标签样式
+                                color: '#000000'
+                            },
                         }, {
                             name: 'Word',
-                            symbol: 'Circle'
+                            symbol: 'Circle',
+                            label: { //标签样式
+                                color: '#000000'
+                            },
                         }],
                     links: [ //edges是其别名,代表节点间的关系数据。
                         {
