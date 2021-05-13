@@ -44,6 +44,8 @@
         <h1>Graph</h1>
         <div id="main" style="width: 600px;height:400px;"></div>
         <script type="text/javascript">
+            /*ECharts3 开始*/
+
             // 基于准备好的dom，初始化ECharts实例
             var myChart = echarts.init(document.getElementById('main'), 'macarons');            // 指定图表的配置项和数据
             var option = {
@@ -76,40 +78,6 @@
                         }
 
                         console.log(params);
-                        $.ajax({
-                            async: true,//设置异、同步加载
-                            cache: false,//false就不会从浏览器缓存中加载请求信息了
-                            type: 'post',
-                            dataType: "json",
-                            url: path,//请求的action路径
-                            success: function (data) { //请求成功后处理函数。
-                                //加工返回后的数据
-                                debugger;
-                                if (category == 2) { //当选择端口号时
-                                    var res = 'jvm最大内存值:' + data.memoryMaxSize + '<br/>';
-                                    res += 'jvm空闲内存值:' + data.memoryFreeSize + '<br/>';
-                                    res += 'jvm内存使用率：' + data.memoryPer + '<br/>';
-                                    res += '空闲线程：' + data.ideThread + '<br/>';
-                                    res += '总线程：' + data.totalThread + '<br/>';
-                                    res += '每秒处理的线程数比率：' + data.throuhput + '<br/>';
-                                    callback(ticket, res);
-                                } else if (category == 4) {//当选择用户名时
-                                    var res = '当前链接数：' + data.processCount + '<br/>';
-                                    res += '最大链接数：' + data.maxProcessCount + '<br/>';
-                                    callback(ticket, res);
-                                }
-
-                            },
-                            error: function () {//请求失败处理函数
-                                $.messager.alert('警告', '请求失败！', 'warning');
-                            }
-                        });
-                        if (category == 2 || category == 4) { //当选择端口号与用户名时提示加载
-                            return "loading";
-                        } else {                   //其他情况显示所属图例以及名称
-                            return myChart.getOption().series[params.seriesIndex].categories[params.data.category].name + ":" + params.name;
-                        }
-
                     }
                 },
 
@@ -117,14 +85,15 @@
                     show: true,
                     data: [{
                         name: 'Author',
-                        icon: 'rect'
+                        icon: 'roundRect',
                         //'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'
                     }, {
                         name: 'Paper',
-                        icon: 'roundRect'
+                        icon: 'rect',
+
                     }, {
                         name: 'Word',
-                        icon: 'circle'
+                        icon: 'circle',
                     }]
                 },
                 series: [{
@@ -136,7 +105,8 @@
                     coordinateSystem: null,//坐标系可选
                     xAxisIndex: 0, //x轴坐标 有多种坐标系轴坐标选项
                     yAxisIndex: 0, //y轴坐标
-                    force: { //力引导图基本配置
+                    force: {
+                        //力引导图基本配置
                         //initLayout: ,//力引导的初始化布局，默认使用xy轴的标点
                         repulsion: 100,//节点之间的斥力因子。支持数组表达斥力范围，值越大斥力越大。
                         gravity: 0.03,//节点受到的向中心的引力因子。该值越大节点越往中心点靠拢。
@@ -159,25 +129,21 @@
                             label: {
                                 show: true
                             },
-                            borderType: 'solid', //图形描边类型，默认为实线，支持 'solid'（实线）, 'dashed'(虚线), 'dotted'（点线）。
-                            borderColor: 'rgba(255,215,0,0.4)', //设置图形边框为淡金色,透明度为0.4
-                            borderWidth: 2, //图形的描边线宽。为 0 时无描边。
-                            opacity: 1
-                            // 图形透明度。支持从 0 到 1 的数字，为 0 时不绘制该图形。默认0.5
-
                         },
                         emphasis: {//高亮状态
-
+                            borderType: 'solid', //图形描边类型，默认为实线，支持 'solid'（实线）, 'dashed'(虚线), 'dotted'（点线）。
+                            borderColor: 'rgba(255,215,0,0.4)', //设置图形边框为淡金色,透明度为0.4
+                            borderWidth: 3, //图形的描边线宽。为 0 时无描边。
+                            opacity: 1   // 图形透明度。支持从 0 到 1 的数字，为 0 时不绘制该图形。默认0.5
                         }
                     },
                     lineStyle: { //==========关系边的公用线条样式。
                         normal: {
-                            color: 'rgba(255,0,255,0.4)',
-                            width: '3',
-                            type: 'dotted', //线的类型 'solid'（实线）'dashed'（虚线）'dotted'（点线）
-                            curveness: 0.3, //线条的曲线程度，从0到1
-                            opacity: 1
-                            // 图形透明度。支持从 0 到 1 的数字，为 0 时不绘制该图形。默认0.5
+                            color: 'rgba(60,63,65,0.6)',
+                            width: '2',
+                            type: 'solid', //线的类型 'solid'（实线）'dashed'（虚线）'dotted'（点线）
+                            curveness: 0.1, //线条的曲线程度，从0到1
+                            opacity: 1  // 图形透明度。支持从 0 到 1 的数字，为 0 时不绘制该图形。默认0.5
                         },
                         emphasis: {//高亮状态
 
@@ -207,111 +173,112 @@
 
                         }
                     },
-                    //别名为nodes   name:影响图形标签显示,value:影响选中后值得显示,category:所在类目的index,symbol:类目节点标记图形,symbolSize:10图形大小
-                    //label:标签样式。
-                    data: [{
-                        id: 0,
-                        category: 0,
-                        name: 'Mina Tahmasbi Arashloo',
-                        symbol: 'roundRect',
-                        value: 20,
-                        symbolSize: 80
-                    }, {
-                        id: 1,
-                        category: 1,
-                        name: 'Title 3',
-                        symbol: 'rect',
-                        value: 20,
-                        symbolSize: 70
-                    }, {
-                        id: 2,
-                        category: 2,
-                        name: '7001',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 60,
-                        yId: "jvm",
-                        host: "192.168.6.37",
-                        port: "7001",
-                        username: "weblogic",
-                        pwd: "weblogic1"
-                    }, {
-                        id: 3,
-                        category: 2,
-                        name: '7100',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 60
-                    }, {
-                        id: 4,
-                        category: 1,
-                        name: 'Title 2',
-                        symbol: 'rect',
-                        value: 20,
-                        symbolSize: 70
-                    }, {
-                        id: 5,
-                        category: 2,
-                        name: '7001',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 60
-                    }, {
-                        id: 6,
-                        category: 2,
-                        name: '7100',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 60
-                    }, {
-                        id: 7,
-                        category: 2,
-                        name: '7001',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 60
-                    }, {
-                        id: 8,
-                        category: 1,
-                        name: 'Title 1',
-                        symbol: 'rect',
-                        value: 20,
-                        symbolSize: 70
-                    }, {
-                        id: 9,
-                        category: 2,
-                        name: '7101',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 60
-                    }, {
-                        id: 10,
-                        category: 2,
-                        name: '7101',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 60
-                    }, {
-                        id: 11,
-                        category: 2,
-                        name: '7001',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 60
-                    }, {
-                        id: 12,
-                        category: 2,
-                        name: '7100',
-                        symbol: 'circle',
-                        value: 20,
-                        symbolSize: 60
-                    }],
+                    //别名为nodes   name:影响图形标签显示,value:影响选中后值得显示,category:所在类目的index,symbol:类目节点标记图形,symbolSize:10图形大小,label:标签样式。
+                    data: [
+                        {
+                            id: 0,
+                            category: 0,
+                            name: 'Mina Tahmasbi Arashloo',
+                            symbol: 'roundRect',
+                            value: 20,
+                            symbolSize: 30,
+                        }, {
+                            id: 1,
+                            category: 1,
+                            name: 'Title 3',
+                            symbol: 'rect',
+                            value: 20,
+                            symbolSize: 70,
+                        }, {
+                            id: 2,
+                            category: 2,
+                            name: '7001',
+                            symbol: 'circle',
+                            value: 20,
+                            symbolSize: 60,
+                            yId: "jvm",
+                            host: "192.168.6.37",
+                            port: "7001",
+                            username: "weblogic",
+                            pwd: "weblogic1"
+                        }, {
+                            id: 3,
+                            category: 2,
+                            name: '7100',
+                            symbol: 'circle',
+                            value: 20,
+                            symbolSize: 60
+                        }, {
+                            id: 4,
+                            category: 1,
+                            name: 'Title 2',
+                            symbol: 'rect',
+                            value: 20,
+                            symbolSize: 70
+                        }, {
+                            id: 5,
+                            category: 2,
+                            name: '7001',
+                            symbol: 'circle',
+                            value: 20,
+                            symbolSize: 60
+                        }, {
+                            id: 6,
+                            category: 2,
+                            name: '7100',
+                            symbol: 'circle',
+                            value: 20,
+                            symbolSize: 60
+                        }, {
+                            id: 7,
+                            category: 2,
+                            name: '7001',
+                            symbol: 'circle',
+                            value: 20,
+                            symbolSize: 60
+                        }, {
+                            id: 8,
+                            category: 1,
+                            name: 'Title 1',
+                            symbol: 'rect',
+                            value: 20,
+                            symbolSize: 70
+                        }, {
+                            id: 9,
+                            category: 2,
+                            name: '7101',
+                            symbol: 'circle',
+                            value: 20,
+                            symbolSize: 60
+                        }, {
+                            id: 10,
+                            category: 2,
+                            name: '7101',
+                            symbol: 'circle',
+                            value: 20,
+                            symbolSize: 60
+                        }, {
+                            id: 11,
+                            category: 2,
+                            name: '7001',
+                            symbol: 'circle',
+                            value: 20,
+                            symbolSize: 60
+                        }, {
+                            id: 12,
+                            category: 2,
+                            name: '7100',
+                            symbol: 'circle',
+                            value: 20,
+                            symbolSize: 60
+                        }],
                     categories: [ //symbol name：用于和 legend 对应以及格式化 tooltip 的内容。 label有效
                         {
                             name: 'Author',
                             symbol: 'rect',
                             label: { //标签样式
-                            }
+                                color: '#000000'
+                            },
                         }, {
                             name: 'Paper',
                             symbol: 'roundRect'
@@ -319,7 +286,7 @@
                             name: 'Word',
                             symbol: 'Circle'
                         }],
-                    links: [ //edges是其别名代表节点间的关系数据。
+                    links: [ //edges是其别名,代表节点间的关系数据。
                         {
                             source: 1,
                             target: 0
@@ -399,7 +366,7 @@
                 return str;
             }
 
-            //var ecConfig = echarts.config; echarts2的获取事件方法，当前为echarts3
+            //var ecConfig = echarts.config; echarts2的获取事件方法，当前为echarts 3
             myChart.on('mouseover', openOrFold);
             //'click'、'dblclick'、'mousedown'、'mousemove'、'mouseup'、'mouseover'、'mouseout'
             /*ECharts3 方法部分 结束*/
