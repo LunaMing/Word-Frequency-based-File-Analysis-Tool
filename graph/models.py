@@ -1,5 +1,5 @@
 from django.db import models
-from neomodel import StructuredNode, StringProperty, IntegerProperty, UniqueIdProperty, RelationshipTo
+from neomodel import StructuredNode, StringProperty, IntegerProperty, RelationshipTo, StructuredRel
 
 
 class PaperInfo(models.Model):
@@ -12,16 +12,21 @@ class PaperInfo(models.Model):
         return self.title
 
 
-class City(StructuredNode):
-    code = StringProperty(unique_index=True, required=True)
-    name = StringProperty(index=True, default="city")
+class Word(StructuredNode):
+    name = StringProperty(unique_index=True, required=True)
 
 
-class Person(StructuredNode):
-    uid = UniqueIdProperty()
-    name = StringProperty(unique_index=True)
-    age = IntegerProperty(index=True, default=0)
+class Contain(StructuredRel):
+    number = IntegerProperty(required=True)
 
-    # Relations :
-    city = RelationshipTo(City, 'LIVES_IN')
-    friends = RelationshipTo('Person', 'FRIEND')
+
+class Paper(StringProperty):
+    title = StringProperty(unique_index=True, required=True)
+
+    word = RelationshipTo(Word, 'CONTAIN', model=Contain)
+
+
+class Author(StructuredNode):
+    name = StringProperty(unique_index=True, required=True)
+
+    paper = RelationshipTo(Paper, "WRITE")

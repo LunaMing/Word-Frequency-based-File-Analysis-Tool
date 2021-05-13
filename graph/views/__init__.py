@@ -1,2 +1,3 @@
-from graph.views.city import *
-from graph.views.person import *
+from graph.views.paper import *
+from graph.views.author import *
+from graph.views.index import *

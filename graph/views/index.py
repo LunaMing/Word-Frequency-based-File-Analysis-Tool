@@ -1,8 +1,13 @@
-from django.shortcuts import render
+from django.http import HttpResponse
+from django.template import loader
 
 
-def index(request):
+def getIndex(request):
     # latest_question_list = []
     latest_question_list = ["question1", "question2"]
     context = {'latest_question_list': latest_question_list}
-    return render(request, 'graph/index.html', context)
+    template = loader.get_template('graph/index.html')
+    context = {
+        'latest_question_list': latest_question_list,
+    }
+    return HttpResponse(template.render(context, request))
