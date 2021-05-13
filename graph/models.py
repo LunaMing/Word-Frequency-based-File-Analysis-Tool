@@ -20,7 +20,7 @@ class Contain(StructuredRel):
     number = IntegerProperty(required=True)
 
 
-class Paper(StringProperty):
+class Paper(StructuredNode):
     title = StringProperty(unique_index=True, required=True)
 
     word = RelationshipTo(Word, 'CONTAIN', model=Contain)
