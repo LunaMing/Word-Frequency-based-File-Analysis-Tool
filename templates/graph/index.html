@@ -59,6 +59,8 @@
             /*ECharts3 开始*/
 
             var author_list = {{ authors | safe }}
+            var paper_list = {{ papers | safe }}
+            var word_list = {{ words | safe }}
 
             // 基于准备好的dom，初始化ECharts实例
             var myChart = echarts.init(document.getElementById('main'), 'macarons');            // 指定图表的配置项和数据
@@ -189,28 +191,28 @@
                         }, {
                             id: 1,
                             category: 1,
-                            name: '{{ title_0 }}',
+                            name: paper_list[0],
                             symbol: 'rect',
                             value: 20,
                             symbolSize: 30,
                         }, {
                             id: 2,
                             category: 1,
-                            name: '{{ title_1 }}',
+                            name: paper_list[1],
                             symbol: 'rect',
                             value: 20,
                             symbolSize: 70
                         }, {
                             id: 3,
                             category: 2,
-                            name: '{{ word_0 }}',
+                            name: word_list[0],
                             symbol: 'circle',
                             value: 20,
                             symbolSize: 60
                         }, {
                             id: 4,
                             category: 2,
-                            name: '{{ word_1 }}',
+                            name: word_list[1],
                             symbol: 'circle',
                             value: 20,
                             symbolSize: 60

@@ -12,11 +12,9 @@ def getIndex(request):
 
     template = loader.get_template('graph/index.html')
     context = {
-        'title_0': title_list[0],
-        'title_1': title_list[1],
         'edges': edges,
-        'word_0': word_list[0],
-        'word_1': word_list[1],
         'authors': author_list,
+        'papers': title_list,
+        'words': word_list,
     }
     return HttpResponse(template.render(context, request))
