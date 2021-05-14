@@ -58,7 +58,7 @@
         <script type="text/javascript">
             /*ECharts3 开始*/
 
-            var author_list = ['{{ author_0 }}']
+            var author_list = {{ authors | safe }}
 
             // 基于准备好的dom，初始化ECharts实例
             var myChart = echarts.init(document.getElementById('main'), 'macarons');            // 指定图表的配置项和数据
