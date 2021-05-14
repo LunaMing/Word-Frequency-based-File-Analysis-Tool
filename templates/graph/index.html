@@ -39,14 +39,12 @@
     <br>
     <i style="padding: 10px" class="fa fa-upload"></i> Upload PDF Files <br>
     <br>
-    <img style="float: left; padding-right: 15px; padding-top: 5px;" src="{% static 'graph/icons/pdf.png' %}"
-         alt="icon pdf" width="40" height="40">
-    {{ title_0 }}<br>
-    <br>
-    <img style="float: left; padding-right: 15px; padding-top: 5px;" src="{% static 'graph/icons/pdf.png' %}"
-         alt="icon pdf" width="40" height="40">
-    {{ title_1 }}<br>
-    <br>
+    {% for paper in papers %}
+        <img style="float: left; padding-right: 15px; padding-top: 5px;" src="{% static 'graph/icons/pdf.png' %}"
+             alt="icon pdf" width="40" height="40">
+        {{ paper }}<br>
+        <br>
+    {% endfor %}
     <a href="#" class="button" id="start_btn" onclick="alert('TODO')">Start ></a>
     <a href="#" class="button" id="start_btn" onclick="refreshData(null)">Clear Graph</a>
 </div>
@@ -58,9 +56,12 @@
         <script type="text/javascript">
             /*ECharts3 开始*/
 
-            var author_list = {{ authors | safe }}
-            var paper_list = {{ papers | safe }}
-            var word_list = {{ words | safe }}
+            var author_list =
+            {{ authors | safe }}
+            var paper_list =
+            {{ papers | safe }}
+            var word_list =
+            {{ words | safe }}
 
             // 基于准备好的dom，初始化ECharts实例
             var myChart = echarts.init(document.getElementById('main'), 'macarons');            // 指定图表的配置项和数据
@@ -237,7 +238,7 @@
                                 color: '#000000'
                             },
                         }],
-                    links: [{source:1,target:0},{source:1,target:3},{source:1,target:4}]
+                    links: [{source: 1, target: 0}, {source: 1, target: 3}, {source: 1, target: 4}]
                 }]
             };
 
