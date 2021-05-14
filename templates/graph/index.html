@@ -58,6 +58,8 @@
         <script type="text/javascript">
             /*ECharts3 开始*/
 
+            var author_list = ['{{ author_0 }}']
+
             // 基于准备好的dom，初始化ECharts实例
             var myChart = echarts.init(document.getElementById('main'), 'macarons');            // 指定图表的配置项和数据
             var option = {
@@ -180,7 +182,7 @@
                         {
                             id: 0,
                             category: 0,
-                            name: '{{ author_0 }}',
+                            name: author_list[0],
                             symbol: 'roundRect',
                             value: 20,
                             symbolSize: 50,
