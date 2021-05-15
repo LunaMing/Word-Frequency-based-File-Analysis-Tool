@@ -1,18 +1,21 @@
 from django.http import HttpResponse
 from django.template import loader
 
+from algorithm import word_freq
 from views.controller import export_neo4j_data
 
 
 def get_new_graph(request):
-    template = loader.get_template('graph/index.html')
-
+    # 读取文件名
     pdf_list = ["nsdi20spring_arashloo_prepub.pdf", "nsdi20spring_birkner_prepub.pdf"]
-
+    # 词频统计
+    word_freq()
+    # 图谱
     res = export_neo4j_data()
     node_list = []
     link_list = []
     data_to_node_and_link(res, node_list, link_list)
+    template = loader.get_template('graph/index.html')
 
     context = {
         'pdfs': pdf_list,

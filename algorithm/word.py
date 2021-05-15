@@ -34,12 +34,12 @@ def pdf2text(pdf_name: str):
        """
 
     # 读取pdf文件
-    pdf_path = "../res/pdf/" + pdf_name + ".pdf"
+    pdf_path = "res/pdf/" + pdf_name + ".pdf"
     with open(pdf_path, "rb") as f:
         pdf = pdftotext.PDF(f)
 
     # 写入txt文件
-    txt_path = "../res/txt/" + pdf_name + ".txt"
+    txt_path = "res/txt/" + pdf_name + ".txt"
     fo = open(txt_path, "w", encoding='UTF-8')
     for page in pdf:
         fo.write(str(page) + "\n")
@@ -145,7 +145,7 @@ def count(raw_txt: str, out_file: str):
     print(top)
 
     # 输出结果到文件
-    fo = open("../output/" + out_file, "w", encoding='UTF-8')
+    fo = open("output/" + out_file, "w", encoding='UTF-8')
     fo.write("total word num: " + str(total_word_num) + "\n")
     fo.write("candidate keyword num: " + str(key_num) + "\n")
     for key in keys:
@@ -179,6 +179,6 @@ def total_count(str_list):
     print(X_train)
 
     # 输出结果到文件
-    X_train.to_csv("../output/total.csv")
+    X_train.to_csv("output/total.csv")
 
     return X_train

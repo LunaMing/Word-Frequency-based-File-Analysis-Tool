@@ -1,4 +1,5 @@
-from src import picture, word
+from algorithm import picture
+import word
 
 
 def word_freq():
