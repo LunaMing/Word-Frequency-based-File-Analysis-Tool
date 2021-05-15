@@ -37,43 +37,6 @@ def getAllPapers(request):
 
     template = loader.get_template('graph/index.html')
 
-    # [
-    #                         {
-    #                             id: 0,
-    #                             category: 0,
-    #                             name: author_list[0],
-    #                             symbol: 'roundRect',
-    #                             value: 20,
-    #                             symbolSize: 50,
-    #                         }, {
-    #                             id: 1,
-    #                             category: 1,
-    #                             name: paper_list[0],
-    #                             symbol: 'rect',
-    #                             value: 20,
-    #                             symbolSize: 30,
-    #                         }, {
-    #                             id: 2,
-    #                             category: 1,
-    #                             name: paper_list[1],
-    #                             symbol: 'rect',
-    #                             value: 20,
-    #                             symbolSize: 70
-    #                         }, {
-    #                             id: 3,
-    #                             category: 2,
-    #                             name: word_list[0],
-    #                             symbol: 'circle',
-    #                             value: 20,
-    #                             symbolSize: 60
-    #                         }, {
-    #                             id: 4,
-    #                             category: 2,
-    #                             name: word_list[1],
-    #                             symbol: 'circle',
-    #                             value: 20,
-    #                             symbolSize: 60
-    #                         }]
     author_list = ["Mina Tahmasbi Arashloo", "Rüdiger Birkner"]
     paper_list = [
         'Enabling Programmable Transport Protocols in High-Speed NICs',
@@ -81,7 +44,7 @@ def getAllPapers(request):
     ]
     word_list = ["machine learning", "flow"]
     node_list = []
-    onenode = {
+    node_author = {
         "id": 0,
         "category": 0,
         "name": author_list[0],
@@ -89,8 +52,8 @@ def getAllPapers(request):
         "value": 20,
         "symbolSize": 50
     }
-    node_list.append(onenode)
-    twonode = {
+    node_list.append(node_author)
+    node_paper = {
         "id": 1,
         "category": 1,
         "name": paper_list[0],
@@ -98,8 +61,8 @@ def getAllPapers(request):
         "value": 20,
         "symbolSize": 30
     }
-    node_list.append(twonode)
-    threenode = {
+    node_list.append(node_paper)
+    node_word = {
         "id": 2,
         "category": 2,
         "name": word_list[0],
@@ -107,7 +70,7 @@ def getAllPapers(request):
         "value": 20,
         "symbolSize": 60
     }
-    node_list.append(threenode)
+    node_list.append(node_word)
 
     link_list = [{"source": 0, "target": 1}, {"source": 1, "target": 2}]
 
