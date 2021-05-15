@@ -1,13 +1,9 @@
-import traceback
-
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.template import loader
-
-from graph.models import Paper
 
 
 def getIndex(request):
-    pdf_list = ["nsdi20spring_arashloo_prepub.pdf", "nsdi20spring_birkner_prepub.pdf"]
+    pdf_list = []
     link_list = []
     node_list = []
 
