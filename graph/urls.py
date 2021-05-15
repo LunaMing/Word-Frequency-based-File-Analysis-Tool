@@ -3,7 +3,10 @@ from django.urls import path
 from graph.views import *
 
 urlpatterns = [
-    path('', getIndex),
-    path('getAllAuthors', getAllAuthors),
-    path('getAllPapers', getAllPapers),
+    path('', get_index),
+    path('getAllAuthors', get_all_authors),
+    path('getAllPapers', get_all_papers),
+    path('getAllWords', get_all_words),
+    path('getAllJson', get_all_json),
+    path('start', get_new_graph),
 ]

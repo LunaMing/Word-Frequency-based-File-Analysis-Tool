@@ -45,8 +45,8 @@
         {{ pdf }}<br>
         <br>
     {% endfor %}
-    <a href="#" class="button" id="start_btn" onclick="alert('TODO')">Start ></a>
-    <a href="#" class="button" id="start_btn" onclick="refreshData(null)">Clear Graph</a>
+    <a href="/start" class="button" id="start_btn">Start ></a>
+    <a href="/.." class="button" id="clear_btn" onclick="refreshData(null)">Clear Graph</a>
 </div>
 
 <div id="right">
@@ -54,25 +54,19 @@
         <h1>Graph</h1>
         <div id="main" style="width: 600px;height:400px;"></div>
         <script type="text/javascript">
-            /*ECharts3 开始*/
-
-            var author_list =
-            {{ authors | safe }}
-            var paper_list =
-            {{ papers | safe }}
-            var word_list =
-            {{ words | safe }}
+            var d =
+            {{ nodes | safe }}
+            var l =
+            {{ links | safe }}
 
             // 基于准备好的dom，初始化ECharts实例
             var myChart = echarts.init(document.getElementById('main'), 'macarons');            // 指定图表的配置项和数据
             var option = {
                 // 全局调色盘。
                 "color": [
-                    "#59c4e6",
-                    "#edafda",
                     "#93b7e3",
-                    "#a5e7f0",
-                    "#cbb0e3"
+                    "#edafda",
+                    "#59c4e6",
                 ], tooltip: {
                     show: true,   //默认显示
                     showContent: true, //是否显示提示框浮层
@@ -91,7 +85,7 @@
                     show: true,
                     data: [{
                         name: 'Author',
-                        icon: 'roundRect',
+                        icon: 'diamond',
                         //'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'
                     }, {
                         name: 'Paper',
@@ -124,10 +118,6 @@
                     nodeScaleRatio: 0.6,//鼠标漫游缩放时节点的相应缩放比例，当设为0时节点不随着鼠标的缩放而缩放
                     draggable: true,//节点是否可拖拽，只在使用力引导布局的时候有用。
                     focusNodeAdjacency: true,//是否在鼠标移到节点上的时候突出显示节点以及节点的边和邻接节点。
-                    //symbol:'roundRect',//关系图节点标记的图形。ECharts 提供的标记类型包括 'circle'(圆形), 'rect'（矩形）, 'roundRect'（圆角矩形）, 'triangle'（三角形）, 'diamond'（菱形）, 'pin'（大头针）, 'arrow'（箭头）  也可以通过 'image://url' 设置为图片，其中 url 为图片的链接。'path:// 这种方式可以任意改变颜色并且抗锯齿
-                    //symbolSize:10 ,//也可以用数组分开表示宽和高，例如 [20, 10] 如果需要每个数据的图形大小不一样，可以设置为如下格式的回调函数：(value: Array|number, params: Object) => number|Array
-                    //symbolRotate:,//关系图节点标记的旋转角度。注意在 markLine 中当 symbol 为 'arrow' 时会忽略 symbolRotate 强制设置为切线的角度。
-                    //symbolOffset:[0,0],//关系图节点标记相对于原本位置的偏移。[0, '50%']
                     edgeSymbol: ['none', 'none'],//边两端的标记类型，可以是一个数组分别指定两端，也可以是单个统一指定。默认不显示标记，常见的可以设置为箭头，如下：edgeSymbol: ['circle', 'arrow']
                     edgeSymbolSize: 10,//边两端的标记大小，可以是一个数组分别指定两端，也可以是单个统一指定。
                     itemStyle: {//===============图形样式，有 normal 和 emphasis 两个状态。normal 是图形在默认状态下的样式；emphasis 是图形在高亮状态下的样式，比如在鼠标悬浮或者图例联动高亮时。
@@ -146,11 +136,11 @@
                     },
                     lineStyle: { //==========关系边的公用线条样式。
                         normal: {
-                            color: 'rgba(60,63,65,0.6)',
-                            width: '2',
+                            color: 'rgba(165,171,182,1)',
+                            width: '1',
                             type: 'solid', //线的类型 'solid'（实线）'dashed'（虚线）'dotted'（点线）
-                            curveness: 0.1, //线条的曲线程度，从0到1
-                            opacity: 1  // 图形透明度。支持从 0 到 1 的数字，为 0 时不绘制该图形。默认0.5
+                            curveness: 0, //线条的曲线程度，从0到1
+                            opacity: 0.7  // 图形透明度。支持从 0 到 1 的数字，为 0 时不绘制该图形。默认0.5
                         },
                         emphasis: {//高亮状态
 
@@ -161,9 +151,9 @@
                             show: true,//是否显示标签。
                             position: 'inside',//标签的位置。['50%', '50%'] [x,y]
                             textStyle: { //标签的字体样式
-                                color: '#cde6c7', //字体颜色
+                                color: '#000000', //字体颜色
                                 fontStyle: 'normal',//文字字体的风格 'normal'标准 'italic'斜体 'oblique' 倾斜
-                                fontWeight: 'bolder',//'normal'标准'bold'粗的'bolder'更粗的'lighter'更细的或100 | 200 | 300 | 400...
+                                fontWeight: 'normal',//'normal'标准'bold'粗的'bolder'更粗的'lighter'更细的或100 | 200 | 300 | 400...
                                 fontFamily: 'sans-serif', //文字的字体系列
                                 fontSize: 12, //字体大小
                             }
@@ -181,110 +171,21 @@
                         }
                     },
                     //别名为nodes   name:影响图形标签显示,value:影响选中后值得显示,category:所在类目的index,symbol:类目节点标记图形,symbolSize:10图形大小,label:标签样式。
-                    data: [
-                        {
-                            id: 0,
-                            category: 0,
-                            name: author_list[0],
-                            symbol: 'roundRect',
-                            value: 20,
-                            symbolSize: 50,
-                        }, {
-                            id: 1,
-                            category: 1,
-                            name: paper_list[0],
-                            symbol: 'rect',
-                            value: 20,
-                            symbolSize: 30,
-                        }, {
-                            id: 2,
-                            category: 1,
-                            name: paper_list[1],
-                            symbol: 'rect',
-                            value: 20,
-                            symbolSize: 70
-                        }, {
-                            id: 3,
-                            category: 2,
-                            name: word_list[0],
-                            symbol: 'circle',
-                            value: 20,
-                            symbolSize: 60
-                        }, {
-                            id: 4,
-                            category: 2,
-                            name: word_list[1],
-                            symbol: 'circle',
-                            value: 20,
-                            symbolSize: 60
-                        }],
+                    data: d,
                     categories: [ //symbol name：用于和 legend 对应以及格式化 tooltip 的内容。 label有效
                         {
                             name: 'Author',
-                            symbol: 'rect',
-                            label: { //标签样式
-                                color: '#000000'
-                            },
                         }, {
                             name: 'Paper',
-                            symbol: 'roundRect',
-                            label: { //标签样式
-                                color: '#000000'
-                            },
                         }, {
                             name: 'Word',
-                            symbol: 'Circle',
-                            label: { //标签样式
-                                color: '#000000'
-                            },
                         }],
-                    links: [{source: 1, target: 0}, {source: 1, target: 3}, {source: 1, target: 4}]
+                    links: l
                 }]
             };
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
-
-            /*ECharts3 方法部分 开始*/
-            function appendPath(params) {    //拼接节点关系并显示在左下角，
-                var option = myChart.getOption();
-                var series = option.series[params.seriesIndex]; //获取图表
-                var nodesOption = series.data;//获取所有数据
-                var links = series.links;//获取所有连线
-                if (params.dataType == "node") { //dataType可以是edge(线条)或node(数据)
-                    var id = params.data.id;
-                    var categoryName = series.categories[params.data.category].name;//获取当前节点的图例名称
-                    var str = categoryName + ":" + nodesOption[id].name;
-                    var i = 0;
-                    var map = {};
-                    for (i = 0; i < links.length; i++) {
-                        map[links[i].source] = links[i].target;
-                    }
-
-                    while (true) {
-                        if (map[id] == undefined) {
-                            break;
-                        }
-                        //获取父节点的图例名称并连接
-                        str = series.categories[nodesOption[map[id]].category].name + ":" + nodesOption[map[id]].name + "->" + str;
-                        id = map[id];
-                    }
-                    return str;
-                } else if (params.dataType == "edge") { //当鼠标停留在连线上时，暂不处理
-                    return "";
-                }
-            }
-
-            function openOrFold(params) {  //该事件会提示节点间关系
-                var str = appendPath(params);
-                document.getElementById("main_1").innerHTML = str;
-                return str;
-            }
-
-            //var ecConfig = echarts.config; echarts2的获取事件方法，当前为echarts 3
-            myChart.on('mouseover', openOrFold);
-
-            //'click'、'dblclick'、'mousedown'、'mousemove'、'mouseup'、'mouseover'、'mouseout'
 
 
             function refreshData(data) {
@@ -294,9 +195,7 @@
                 myChart.setOption(option);
             }
 
-            /*ECharts3 方法部分 结束*/
 
-            /*ECharts3 结束*/
         </script>
     </div>
 

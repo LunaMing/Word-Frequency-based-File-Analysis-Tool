@@ -25,6 +25,14 @@ class Paper(StructuredNode):
 
     word = RelationshipTo(Word, 'CONTAIN', model=Contain)
 
+    def get_contain_words(self):
+        results, columns = self.cypher("MATCH (a) WHERE id(a)=$self MATCH (a)-[:CONTAIN]->(b) RETURN b")
+        return [Word.inflate(row[0]) for row in results]
+
+    def get_paper_author(self):
+        results, columns = self.cypher("MATCH (a) WHERE id(a)=$self MATCH (a)<-[:WRITE]-(b) RETURN b")
+        return [Author.inflate(row[0]) for row in results]
+
 
 class Author(StructuredNode):
     name = StringProperty(unique_index=True, required=True)
