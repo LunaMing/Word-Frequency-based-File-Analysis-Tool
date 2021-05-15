@@ -6,4 +6,5 @@ urlpatterns = [
     path('', getIndex),
     path('getAllAuthors', getAllAuthors),
     path('getAllPapers', getAllPapers),
+    path('getAllContainWords', getAllContainWords),
 ]

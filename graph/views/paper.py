@@ -1,7 +1,10 @@
+import traceback
+
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
+from neomodel import EITHER, Traversal
 
-from graph.models import Paper
+from graph.models import Paper, Contain
 
 
 def getAllPapers(request):
@@ -34,3 +37,26 @@ def getAllPapers(request):
         'words': word_list,
     }
     return HttpResponse(template.render(context, request))
+
+def getAllContainWords(request):
+    if request.method == 'GET':
+        try:
+            papers = Paper.nodes.all()
+            response = []
+            for paper in papers:
+                word_list = paper.contain_words()
+                word_name_list=[]
+                for word in word_list:
+                    word_name = word.name
+                    word_name_list.append(word_name)
+                obj = {
+                    "name": paper.title,
+                    "words": word_name_list
+                }
+                response.append(obj)
+            return JsonResponse(response, safe=False)
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            response = {"error": "Error occurred"}
+            return JsonResponse(response, safe=False)
