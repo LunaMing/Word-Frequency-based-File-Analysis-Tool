@@ -1,7 +1,9 @@
 from django.urls import path
 
-from . import views
+from graph.views import *
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', getIndex),
+    path('getAllAuthors', getAllAuthors),
+    path('getAllPapers', getAllPapers),
 ]
