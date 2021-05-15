@@ -2,9 +2,8 @@ import traceback
 
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
-from neomodel import EITHER, Traversal
 
-from graph.models import Paper, Contain
+from graph.models import Paper
 
 
 def getAllPapers(request):
@@ -38,6 +37,7 @@ def getAllPapers(request):
     }
     return HttpResponse(template.render(context, request))
 
+
 def getAllContainWords(request):
     if request.method == 'GET':
         try:
@@ -45,12 +45,18 @@ def getAllContainWords(request):
             response = []
             for paper in papers:
                 word_list = paper.contain_words()
-                word_name_list=[]
+                word_name_list = []
                 for word in word_list:
+                    word_id = word.id
                     word_name = word.name
-                    word_name_list.append(word_name)
+                    word_obj = {
+                        "id": word_id,
+                        "name": word_name
+                    }
+                    word_name_list.append(word_obj)
                 obj = {
-                    "name": paper.title,
+                    "id": paper.id,
+                    "title": paper.title,
                     "words": word_name_list
                 }
                 response.append(obj)
