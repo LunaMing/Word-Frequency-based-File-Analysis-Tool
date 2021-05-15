@@ -54,10 +54,10 @@
         <h1>Graph</h1>
         <div id="main" style="width: 600px;height:400px;"></div>
         <script type="text/javascript">
-            /*ECharts3 开始*/
-
-            var d = {{ nodes | safe }}
-            var l = {{ links | safe }}
+            var d =
+            {{ nodes | safe }}
+            var l =
+            {{ links | safe }}
 
             // 基于准备好的dom，初始化ECharts实例
             var myChart = echarts.init(document.getElementById('main'), 'macarons');            // 指定图表的配置项和数据
@@ -205,47 +205,6 @@
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
 
-            /*ECharts3 方法部分 开始*/
-            function appendPath(params) {    //拼接节点关系并显示在左下角，
-                var option = myChart.getOption();
-                var series = option.series[params.seriesIndex]; //获取图表
-                var nodesOption = series.data;//获取所有数据
-                var links = series.links;//获取所有连线
-                if (params.dataType == "node") { //dataType可以是edge(线条)或node(数据)
-                    var id = params.data.id;
-                    var categoryName = series.categories[params.data.category].name;//获取当前节点的图例名称
-                    var str = categoryName + ":" + nodesOption[id].name;
-                    var i = 0;
-                    var map = {};
-                    for (i = 0; i < links.length; i++) {
-                        map[links[i].source] = links[i].target;
-                    }
-
-                    while (true) {
-                        if (map[id] == undefined) {
-                            break;
-                        }
-                        //获取父节点的图例名称并连接
-                        str = series.categories[nodesOption[map[id]].category].name + ":" + nodesOption[map[id]].name + "->" + str;
-                        id = map[id];
-                    }
-                    return str;
-                } else if (params.dataType == "edge") { //当鼠标停留在连线上时，暂不处理
-                    return "";
-                }
-            }
-
-            function openOrFold(params) {  //该事件会提示节点间关系
-                var str = appendPath(params);
-                document.getElementById("main_1").innerHTML = str;
-                return str;
-            }
-
-            //var ecConfig = echarts.config; echarts2的获取事件方法，当前为echarts 3
-            myChart.on('mouseover', openOrFold);
-
-            //'click'、'dblclick'、'mousedown'、'mousemove'、'mouseup'、'mouseover'、'mouseout'
-
 
             function refreshData(data) {
                 //刷新数据
@@ -254,9 +213,7 @@
                 myChart.setOption(option);
             }
 
-            /*ECharts3 方法部分 结束*/
 
-            /*ECharts3 结束*/
         </script>
     </div>
 
