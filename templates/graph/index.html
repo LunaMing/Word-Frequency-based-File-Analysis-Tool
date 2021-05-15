@@ -63,6 +63,8 @@
             var word_list =
             {{ words | safe }}
 
+            var l = {{ links | safe }}
+
             // 基于准备好的dom，初始化ECharts实例
             var myChart = echarts.init(document.getElementById('main'), 'macarons');            // 指定图表的配置项和数据
             var option = {
@@ -238,7 +240,7 @@
                                 color: '#000000'
                             },
                         }],
-                    links: [{source: 1, target: 0}, {source: 1, target: 3}, {source: 1, target: 4}]
+                    links: l
                 }]
             };
 

@@ -1,5 +1,9 @@
-from django.http import HttpResponse
+import traceback
+
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
+
+from graph.models import Paper
 
 
 def getIndex(request):
@@ -10,6 +14,7 @@ def getIndex(request):
         'Config2Spec: Mining Network Specifications from Network Configurations'
     ]
     word_list = ['segment', 'tonic', 'flow']
+    link_list = []
 
     template = loader.get_template('graph/index.html')
     context = {
@@ -17,5 +22,6 @@ def getIndex(request):
         'authors': author_list,
         'papers': title_list,
         'words': word_list,
+        'links': link_list,
     }
     return HttpResponse(template.render(context, request))
