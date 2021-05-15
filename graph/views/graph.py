@@ -6,7 +6,7 @@ from django.template import loader
 from graph.models import Paper
 
 
-def getAllPapers(request):
+def get_new_graph(request):
     template = loader.get_template('graph/index.html')
 
     res = get_neo4j_data()
