@@ -13,22 +13,10 @@ def getAllPapers(request):
     pdf_list = ["nsdi20spring_arashloo_prepub.pdf", "nsdi20spring_birkner_prepub.pdf"]
 
     node_list = []
-    node_empty = {
-        "id": 0,
-        "category": 0,
-        "name": '-',
-        "symbol": 'rect',
-        "value": 0,
-        "symbolSize": 100
-    }
-    node_list.append(node_empty)
 
     link_list = []
 
     data_to_node_and_link(res, node_list, link_list)
-
-    print(link_list)
-    print(node_list)
 
     context = {
         'pdfs': pdf_list,
@@ -39,6 +27,8 @@ def getAllPapers(request):
 
 
 def data_to_node_and_link(res, node_list, link_list):
+    word_set = set()
+
     for paper in res:
         node_paper = {
             "id": paper["id"],
@@ -67,20 +57,29 @@ def data_to_node_and_link(res, node_list, link_list):
             link_list.append(link)
 
         for word in paper["words"]:
-            node_word = {
-                "id": word["id"],
-                "category": 2,
-                "name": word["name"],
-                "symbol": 'circle',
-                "value": 20,
-                "symbolSize": 60
-            }
-            node_list.append(node_word)
+            if word["name"] not in word_set:
+                word_set.add(word["name"])
+                node_word = {
+                    "id": word["id"],
+                    "category": 2,
+                    "name": word["name"],
+                    "symbol": 'circle',
+                    "value": 20,
+                    "symbolSize": 60
+                }
+                node_list.append(node_word)
             link = {
                 "source": paper["id"],
                 "target": word["id"]
             }
             link_list.append(link)
+
+    print(link_list)
+    print(node_list)
+
+    node_list = sorted(node_list, key=lambda e: e.__getitem__('id'))
+    for node in node_list:
+        print(node)
 
 
 def get_json_data(request):
