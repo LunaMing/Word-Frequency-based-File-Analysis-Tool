@@ -132,5 +132,5 @@ def get_neo4j_data():
     except Exception as e:
         print(e)
         traceback.print_exc()
-        response = {"error": "Error occurred"}
+        response = {"error": e}
     return response
