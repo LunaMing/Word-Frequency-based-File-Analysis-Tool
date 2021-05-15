@@ -1,8 +1,10 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 
+from views.controller import get_all_kind, export_neo4j_data
 
-def getIndex(request):
+
+def get_index(request):
     pdf_list = []
     link_list = []
     node_list = []
@@ -14,3 +16,19 @@ def getIndex(request):
         'nodes': node_list,
     }
     return HttpResponse(template.render(context, request))
+
+
+def get_all_papers(r):
+    return JsonResponse(get_all_kind('Paper'), safe=False)
+
+
+def get_all_words(r):
+    return JsonResponse(get_all_kind('Word'), safe=False)
+
+
+def get_all_authors(r):
+    return JsonResponse(get_all_kind('Author'), safe=False)
+
+
+def get_all_json(r):
+    return JsonResponse(export_neo4j_data(), safe=False)

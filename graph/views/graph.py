@@ -1,21 +1,17 @@
-import traceback
-
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.template import loader
 
-from graph.models import Paper
+from views.controller import export_neo4j_data
 
 
 def get_new_graph(request):
     template = loader.get_template('graph/index.html')
 
-    res = get_neo4j_data()
     pdf_list = ["nsdi20spring_arashloo_prepub.pdf", "nsdi20spring_birkner_prepub.pdf"]
 
+    res = export_neo4j_data()
     node_list = []
-
     link_list = []
-
     data_to_node_and_link(res, node_list, link_list)
 
     context = {
@@ -92,45 +88,3 @@ def data_to_node_and_link(res, node_list, link_list):
     print("--link--")
     for link in link_list:
         print(link)
-
-
-def get_json_data(request):
-    if request.method == 'GET':
-        return JsonResponse(get_neo4j_data(), safe=False)
-
-
-def get_neo4j_data():
-    response = []
-    try:
-        papers = Paper.nodes.all()
-        for paper in papers:
-            authors = []
-            author_list = paper.get_paper_author()
-            for author in author_list:
-                author_obj = {
-                    "id": author.id,
-                    "name": author.name,
-                }
-                authors.append(author_obj)
-
-            words = []
-            word_list = paper.get_contain_words()
-            for word in word_list:
-                word_obj = {
-                    "id": word.id,
-                    "name": word.name,
-                }
-                words.append(word_obj)
-
-            paper = {
-                "id": paper.id,
-                "title": paper.title,
-                "words": words,
-                "authors": authors,
-            }
-            response.append(paper)
-    except Exception as e:
-        print(e)
-        traceback.print_exc()
-        response = {"error": e}
-    return response
