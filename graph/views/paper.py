@@ -34,23 +34,8 @@ def getAllPapers(request):
         traceback.print_exc()
         response = {"error": "Error occurred"}
         return JsonResponse(response, safe=False)
-    author_list = ["author1", "author2"]
-    title_list = pdf_list
-    word_list = ['word1', 'word2', 'word3']
-    link_list = []
-    for item in response:
-        paper_id = item["id"]
-        for word in item["words"]:
-            word_id = word["id"]
-            onelink = {
-                "source": paper_id,
-                "target": word_id
-            }
-            link_list.append(onelink)
 
     template = loader.get_template('graph/index.html')
-
-    link_list = [{"source": 0, "target": 1}]
 
     # [
     #                         {
@@ -94,6 +79,7 @@ def getAllPapers(request):
         'Enabling Programmable Transport Protocols in High-Speed NICs',
         'Config2Spec: Mining Network Specifications from Network Configurations'
     ]
+    word_list = ["machine learning", "flow"]
     node_list = []
     onenode = {
         "id": 0,
@@ -113,12 +99,20 @@ def getAllPapers(request):
         "symbolSize": 30
     }
     node_list.append(twonode)
+    threenode = {
+        "id": 2,
+        "category": 2,
+        "name": word_list[0],
+        "symbol": 'circle',
+        "value": 20,
+        "symbolSize": 60
+    }
+    node_list.append(threenode)
+
+    link_list = [{"source": 0, "target": 1}, {"source": 1, "target": 2}]
 
     context = {
         'pdfs': pdf_list,
-        'authors': author_list,
-        'papers': title_list,
-        'words': word_list,
         'links': link_list,
         'nodes': node_list,
     }

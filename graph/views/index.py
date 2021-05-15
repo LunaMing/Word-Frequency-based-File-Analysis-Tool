@@ -20,9 +20,6 @@ def getIndex(request):
     template = loader.get_template('graph/index.html')
     context = {
         'pdfs': pdf_list,
-        'authors': author_list,
-        'papers': paper_list,
-        'words': word_list,
         'links': link_list,
         'nodes': node_list,
     }
