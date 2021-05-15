@@ -84,10 +84,10 @@ def data_to_node_and_link(res, node_list, link_list):
                 "target": word_id
             }
             link_list.append(link)
-
-    print("--node--")
-    for node in node_list:
-        print(node)
-    print("--link--")
-    for link in link_list:
-        print(link)
+    # 打印调试节点
+    # print("--node--")
+    # for node in node_list:
+    #     print(node)
+    # print("--link--")
+    # for link in link_list:
+    #     print(link)
