@@ -39,10 +39,10 @@
     <br>
     <i style="padding: 10px" class="fa fa-upload"></i> Upload PDF Files <br>
     <br>
-    {% for paper in papers %}
+    {% for pdf in pdfs %}
         <img style="float: left; padding-right: 15px; padding-top: 5px;" src="{% static 'graph/icons/pdf.png' %}"
-             alt="icon pdf" width="40" height="40">
-        {{ paper }}<br>
+             alt="icon pdf" width="20" height="20">
+        {{ pdf }}<br>
         <br>
     {% endfor %}
     <a href="#" class="button" id="start_btn" onclick="alert('TODO')">Start ></a>
