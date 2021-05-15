@@ -51,12 +51,76 @@ def getAllPapers(request):
     template = loader.get_template('graph/index.html')
 
     link_list = [{"source": 0, "target": 1}]
+
+    # [
+    #                         {
+    #                             id: 0,
+    #                             category: 0,
+    #                             name: author_list[0],
+    #                             symbol: 'roundRect',
+    #                             value: 20,
+    #                             symbolSize: 50,
+    #                         }, {
+    #                             id: 1,
+    #                             category: 1,
+    #                             name: paper_list[0],
+    #                             symbol: 'rect',
+    #                             value: 20,
+    #                             symbolSize: 30,
+    #                         }, {
+    #                             id: 2,
+    #                             category: 1,
+    #                             name: paper_list[1],
+    #                             symbol: 'rect',
+    #                             value: 20,
+    #                             symbolSize: 70
+    #                         }, {
+    #                             id: 3,
+    #                             category: 2,
+    #                             name: word_list[0],
+    #                             symbol: 'circle',
+    #                             value: 20,
+    #                             symbolSize: 60
+    #                         }, {
+    #                             id: 4,
+    #                             category: 2,
+    #                             name: word_list[1],
+    #                             symbol: 'circle',
+    #                             value: 20,
+    #                             symbolSize: 60
+    #                         }]
+    author_list = ["Mina Tahmasbi Arashloo", "Rüdiger Birkner"]
+    paper_list = [
+        'Enabling Programmable Transport Protocols in High-Speed NICs',
+        'Config2Spec: Mining Network Specifications from Network Configurations'
+    ]
+    node_list = []
+    onenode = {
+        "id": 0,
+        "category": 0,
+        "name": author_list[0],
+        "symbol": 'roundRect',
+        "value": 20,
+        "symbolSize": 50
+    }
+    node_list.append(onenode)
+    twonode = {
+        "id": 1,
+        "category": 1,
+        "name": paper_list[0],
+        "symbol": 'rect',
+        "value": 20,
+        "symbolSize": 30
+    }
+    node_list.append(twonode)
+
     context = {
         'pdfs': pdf_list,
         'authors': author_list,
         'papers': title_list,
         'words': word_list,
         'links': link_list,
+        'nodes': node_list,
     }
     return HttpResponse(template.render(context, request))
 

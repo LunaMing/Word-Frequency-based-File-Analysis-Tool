@@ -63,6 +63,7 @@
             var word_list =
             {{ words | safe }}
 
+            var d = {{ nodes | safe }}
             var l = {{ links | safe }}
 
             // 基于准备好的dom，初始化ECharts实例
@@ -183,43 +184,7 @@
                         }
                     },
                     //别名为nodes   name:影响图形标签显示,value:影响选中后值得显示,category:所在类目的index,symbol:类目节点标记图形,symbolSize:10图形大小,label:标签样式。
-                    data: [
-                        {
-                            id: 0,
-                            category: 0,
-                            name: author_list[0],
-                            symbol: 'roundRect',
-                            value: 20,
-                            symbolSize: 50,
-                        }, {
-                            id: 1,
-                            category: 1,
-                            name: paper_list[0],
-                            symbol: 'rect',
-                            value: 20,
-                            symbolSize: 30,
-                        }, {
-                            id: 2,
-                            category: 1,
-                            name: paper_list[1],
-                            symbol: 'rect',
-                            value: 20,
-                            symbolSize: 70
-                        }, {
-                            id: 3,
-                            category: 2,
-                            name: word_list[0],
-                            symbol: 'circle',
-                            value: 20,
-                            symbolSize: 60
-                        }, {
-                            id: 4,
-                            category: 2,
-                            name: word_list[1],
-                            symbol: 'circle',
-                            value: 20,
-                            symbolSize: 60
-                        }],
+                    data: d,
                     categories: [ //symbol name：用于和 legend 对应以及格式化 tooltip 的内容。 label有效
                         {
                             name: 'Author',
