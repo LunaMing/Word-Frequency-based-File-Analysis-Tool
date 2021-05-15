@@ -35,7 +35,7 @@ def data_to_node_and_link(res, node_list, link_list):
             "category": 1,
             "name": paper["title"],
             "symbol": 'rect',
-            "value": 20,
+            "value": paper["id"],
             "symbolSize": 30
         }
         node_list.append(node_paper)
@@ -46,7 +46,7 @@ def data_to_node_and_link(res, node_list, link_list):
                 "category": 0,
                 "name": author["name"],
                 "symbol": 'roundRect',
-                "value": 20,
+                "value": author["id"],
                 "symbolSize": 50
             }
             node_list.append(node_author)
@@ -64,7 +64,7 @@ def data_to_node_and_link(res, node_list, link_list):
                     "category": 2,
                     "name": word["name"],
                     "symbol": 'circle',
-                    "value": 20,
+                    "value": word["id"],
                     "symbolSize": 60
                 }
                 node_list.append(node_word)
@@ -74,12 +74,14 @@ def data_to_node_and_link(res, node_list, link_list):
             }
             link_list.append(link)
 
-    print(link_list)
-    print(node_list)
-
     node_list = sorted(node_list, key=lambda e: e.__getitem__('id'))
+
+    print("--node--")
     for node in node_list:
         print(node)
+    print("--link--")
+    for link in link_list:
+        print(link)
 
 
 def get_json_data(request):
