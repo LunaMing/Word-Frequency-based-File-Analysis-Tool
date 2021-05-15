@@ -13,7 +13,7 @@ def getAllPapers(request):
         response = []
         for paper in papers:
             pdf_list.append(paper.title)
-            word_list = paper.contain_words()
+            word_list = paper.get_contain_words()
             word_name_list = []
             for word in word_list:
                 word_id = word.id
@@ -84,26 +84,35 @@ def getAllPapers(request):
 
 def getAllContainWords(request):
     if request.method == 'GET':
+        response = []
         try:
             papers = Paper.nodes.all()
-            response = []
             for paper in papers:
-                word_list = paper.contain_words()
-                word_name_list = []
-                for word in word_list:
-                    word_id = word.id
-                    word_name = word.name
-                    word_obj = {
-                        "id": word_id,
-                        "name": word_name
+                authors = []
+                author_list = paper.get_paper_author()
+                for author in author_list:
+                    author_obj = {
+                        "id": author.id,
+                        "name": author.name,
                     }
-                    word_name_list.append(word_obj)
-                obj = {
+                    authors.append(author_obj)
+
+                words = []
+                word_list = paper.get_contain_words()
+                for word in word_list:
+                    word_obj = {
+                        "id": word.id,
+                        "name": word.name,
+                    }
+                    words.append(word_obj)
+
+                paper = {
                     "id": paper.id,
                     "title": paper.title,
-                    "words": word_name_list
+                    "words": words,
+                    "authors": authors,
                 }
-                response.append(obj)
+                response.append(paper)
             return JsonResponse(response, safe=False)
         except Exception as e:
             print(e)
