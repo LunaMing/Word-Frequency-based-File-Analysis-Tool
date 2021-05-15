@@ -38,7 +38,7 @@ def data_to_node_and_link(res, node_list, link_list):
             "name": paper["title"],
             "symbol": 'rect',
             "value": node_index,
-            "symbolSize": 30
+            "symbolSize": [30, 20]
         }
         node_list.append(node_paper)
         node_index += 1
@@ -48,9 +48,9 @@ def data_to_node_and_link(res, node_list, link_list):
             node_author = {
                 "category": 0,
                 "name": author["name"],
-                "symbol": 'roundRect',
+                "symbol": 'diamond',
                 "value": node_index,
-                "symbolSize": 50
+                "symbolSize": 20
             }
             node_list.append(node_author)
             node_index += 1
