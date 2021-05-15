@@ -6,6 +6,7 @@ urlpatterns = [
     path('', getIndex),
     path('getAllAuthors', getAllAuthors),
     path('getAllPapers', getAllPapers),
+    path('getAllWords', getAllWords),
     path('start', get_new_graph),
     path('getAllJson', get_json_data),
 ]
