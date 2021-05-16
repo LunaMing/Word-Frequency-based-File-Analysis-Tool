@@ -92,7 +92,11 @@ def total_count(str_list):
     print("Document: " + str(c1) + " Word: " + str(c2))
 
     print("-- Export matrix transpose results to csv file --")
-    X_train.T.to_csv("output/total.csv")
+    # 转置
+    X_T = X_train.T
+    # 每一项都乘
+    X_T_multiple = X_T * 100
+    X_T_multiple.to_csv("output/total.csv")
 
     return X_train
 
