@@ -176,6 +176,7 @@ def word_freq():
 if __name__ == '__main__':
     from sklearn.feature_extraction.text import CountVectorizer
 
+    # 标记和计算文本文档的最小语料库中出现的单词
     vectorizer = CountVectorizer()
     corpus = [
         'This is the first document.',
@@ -183,15 +184,22 @@ if __name__ == '__main__':
         'And the third one.',
         'Is this the first document?',
     ]
-    X = vectorizer.fit_transform(corpus)
-    # print(X)
+    X_fit_trans_outcome = vectorizer.fit_transform(corpus)
+    # print(X_fit_trans_outcome)
 
+    # 默认配置通过提取至少两个字母的单词来标记字符串
     analyze = vectorizer.build_analyzer()
     word_bag_list = analyze("This is a text document to analyze.")
     # print(word_bag_list)
 
-    f = vectorizer.get_feature_names()
-    print(f)
-    print(X.toarray())
+    # 分析器在匹配过程中发现的每个术语都被分配一个唯一的整数索引，该索引对应于结果矩阵中的一个列
+    feature_name_list = vectorizer.get_feature_names()
+    # print(feature_name_list)
+    X_matrix = X_fit_trans_outcome.toarray()
+    # print(X_matrix)
+
+    # 从特征名到列索引的反向映射存储在向量器的 vocabulary_ 属性中
+    word_dict = vectorizer.vocabulary_
+    # print(word_dict)
 
     exit()
