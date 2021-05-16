@@ -1,52 +1,10 @@
 import pandas as pd
-import pdftotext
 from nltk import pos_tag
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-
-
-def word_deal(pdf_name: str):
-    """ 文本处理对外接口
-
-        包括pdf转txt、文本预处理。
-
-        :param pdf_name: pdf文件名，不包含后缀。
-
-    """
-    txt_path = pdf2text(pdf_name)
-    raw_str = open(txt_path, 'r', encoding='UTF-8').read()
-    s = preprocessing_str(raw_str)
-    return s
-
-
-def pdf2text(pdf_name: str):
-    """pdf转txt
-
-       将pdf转为txt文件。其中格式原封不动按照pdf来做，换行或左右双排无法特殊识别。
-
-       :param pdf_name: pdf文件名，不包含后缀
-       :type pdf_name: str
-       :returns: 生成的txt文件路径
-       :rtype: str
-       """
-
-    # 读取pdf文件
-    pdf_path = "res/pdf/" + pdf_name + ".pdf"
-    with open(pdf_path, "rb") as f:
-        pdf = pdftotext.PDF(f)
-
-    # 写入txt文件
-    txt_path = "res/txt/" + pdf_name + ".txt"
-    fo = open(txt_path, "w", encoding='UTF-8')
-    for page in pdf:
-        fo.write(str(page) + "\n")
-    fo.close()
-
-    print("PDF -> TXT : " + txt_path)
-    return txt_path
 
 
 def preprocessing_str(s: str):
@@ -167,18 +125,18 @@ def total_count(str_list):
     X_train = vectoriser.fit_transform(X_train[colname])
     print(X_train)
 
-    print("-- Convert sparse matrix to dataframe --")
-    X_train = pd.DataFrame.sparse.from_spmatrix(X_train)
-    print(X_train)
+    # print("-- Convert sparse matrix to dataframe --")
+    # X_train = pd.DataFrame.sparse.from_spmatrix(X_train)
+    # print(X_train)
+    #
+    # # Save mapping on which index refers to which words
+    # col_map = {v: k for k, v in vectoriser.vocabulary_.items()}
+    # print("--Rename each column using the mapping--")
+    # for col in X_train.columns:
+    #     X_train.rename(columns={col: col_map[col]}, inplace=True)
+    # print(X_train)
 
-    # Save mapping on which index refers to which words
-    col_map = {v: k for k, v in vectoriser.vocabulary_.items()}
-    print("--Rename each column using the mapping--")
-    for col in X_train.columns:
-        X_train.rename(columns={col: col_map[col]}, inplace=True)
-    print(X_train)
-
-    # 输出结果到文件
-    X_train.to_csv("output/total.csv")
+    # # 输出结果到文件
+    # X_train.to_csv("output/total.csv")
 
     return X_train
