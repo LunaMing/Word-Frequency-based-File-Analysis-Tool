@@ -1,8 +1,7 @@
 from django.http import HttpResponse
 from django.template import loader
 
-from algorithm import word_freq
-from views.controller import export_neo4j_data
+from algorithm import export_neo4j_data, word_freq
 
 
 def get_new_graph(request):
