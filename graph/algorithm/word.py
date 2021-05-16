@@ -242,8 +242,12 @@ if __name__ == '__main__':
               [3, 0, 2]]
     tfidf = transformer.fit_transform(counts)
     # 稀疏矩阵
-    print(tfidf)
+    # print(tfidf)
     tfidf_array = tfidf.toarray()
     print(tfidf_array)
+
+    transformer = TfidfTransformer()
+    tfidf_array_smooth = transformer.fit_transform(counts).toarray()
+    print(tfidf_array_smooth)
 
     exit()
