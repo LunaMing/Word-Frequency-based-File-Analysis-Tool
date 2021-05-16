@@ -1,12 +1,17 @@
 from django.http import HttpResponse
 from django.template import loader
 
-from algorithm import export_neo4j_data, word_freq
+from algorithm import export_neo4j_data, word_freq, read_pdf_names
 
 
 def get_new_graph(request):
-    # 读取文件名
-    pdf_list = ["nsdi20spring_arashloo_prepub.pdf", "nsdi20spring_birkner_prepub.pdf"]
+    pdf_list = []
+    # 读取pdf文件名
+    pdf_path_list = read_pdf_names()
+    for pdf_path in pdf_path_list:
+        # res\pdf\nsdi20spring_cheng_prepub_0.pdf
+        pdf_name = pdf_path.lstrip("res\\pdf\\")
+        pdf_list.append(pdf_name)
     # 词频统计
     word_freq()
     # 图谱
