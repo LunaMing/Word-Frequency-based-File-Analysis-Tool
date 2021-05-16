@@ -204,6 +204,12 @@ if __name__ == '__main__':
 
     # 未在训练语料库中出现的单词将在未来调用转换方法时被完全忽略
     array_test = vectorizer.transform(['Something completely new.']).toarray()
-    print(array_test)
+    # print(array_test)
+
+    # 保存一些局部的排序信息, 2-grams
+    bigram_vectorizer = CountVectorizer(ngram_range=(1, 2), token_pattern=r'\b\w+\b', min_df=1)
+    analyze = bigram_vectorizer.build_analyzer()
+    bi_ana_outcome = analyze('Bi-grams are cool!')
+    print(bi_ana_outcome)
 
     exit()
