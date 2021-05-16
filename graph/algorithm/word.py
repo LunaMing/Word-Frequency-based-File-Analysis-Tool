@@ -170,4 +170,4 @@ def word_freq():
     total_str = ""
     for s in total_str_list:
         total_str += s
-    cloud.cloud(total_str, "total.png")
+    cloud(total_str, "total.png")
