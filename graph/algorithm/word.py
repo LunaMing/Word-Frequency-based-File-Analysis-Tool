@@ -114,9 +114,9 @@ def total_count(str_list):
             top_word = col_map.get(index)
             top_word_list.append(top_word)
         document_top_n.append(top_word_list)
-    print(document_top_n)
+    # print(document_top_n)
 
-    return X_T_multiple
+    return document_top_n
 
 
 def word_freq():
@@ -135,8 +135,12 @@ def word_freq():
         # 计入总字符集
         total_str_list.append(raw_str)
 
-    # 统计
-    total_count(total_str_list)
+    # 统计词频
+    doc_word_list = total_count(total_str_list)
+
+    for i in range(len(pdf_name_list)):
+        print(pdf_name_list[i]+".pdf")
+        print(doc_word_list[i])
 
     # 词云
     # total_str = ""
