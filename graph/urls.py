@@ -1,6 +1,7 @@
 from django.urls import path
 
 from graph.views import *
+from graph.models import test_import
 
 urlpatterns = [
     path('', get_index),
@@ -10,4 +11,5 @@ urlpatterns = [
     path('getAllJson', get_all_json),
     path('getCountJson', get_count_json),
     path('start', get_new_graph),
+    path('testImport', test_import)
 ]

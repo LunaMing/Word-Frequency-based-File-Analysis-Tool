@@ -1,4 +1,6 @@
 from django.db import models
+from django.http import JsonResponse
+from neomodel import RelationshipFrom
 from neomodel import StructuredNode, StringProperty, IntegerProperty, RelationshipTo, StructuredRel
 
 
@@ -40,19 +42,17 @@ class Author(StructuredNode):
     paper = RelationshipTo(Paper, "WRITE")
 
 
-if __name__ == '__main__':
-    from neomodel import RelationshipFrom
-
-    class Dog(StructuredNode):
-        name = StringProperty(required=True)
-        owner = RelationshipTo('Person', 'owner')
+class Dog(StructuredNode):
+    name = StringProperty(required=True)
+    owner = RelationshipTo('Person', 'owner')
 
 
-    class Person(StructuredNode):
-        name = StringProperty(unique_index=True)
-        pets = RelationshipFrom('Dog', 'owner')
+class Person(StructuredNode):
+    name = StringProperty(unique_index=True)
+    pets = RelationshipFrom('Dog', 'owner')
 
 
+def test_import(r):
     bob = Person.get_or_create({"name": "Bob"})[0]
     bobs_gizmo = Dog.get_or_create({"name": "Gizmo"}, relationship=bob.pets)
 
@@ -61,3 +61,8 @@ if __name__ == '__main__':
 
     # not the same gizmo
     assert bobs_gizmo[0] != tims_gizmo[0]
+
+    context = {
+        "msg": "ok"
+    }
+    return JsonResponse(context, safe=False)
