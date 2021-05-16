@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 
-from algorithm import export_neo4j_data, word_freq, read_pdf_names
+from algorithm import export_neo4j_data, word_freq, read_pdf_names, import_neo4j
 
 
 def get_new_graph(request):
@@ -15,12 +15,8 @@ def get_new_graph(request):
     # 词频统计
     doc_word_list = word_freq(pdf_path_list)
 
-    print("0 paper title:")
-    print(pdf_list[0])
-    print("0 doc 0 word")
-    print(doc_word_list[0][0])
-    print("0 doc 1 word")
-    print(doc_word_list[0][1])
+    # 导入数据库
+    import_neo4j(doc_word_list)
 
     # 图谱
     res = export_neo4j_data()

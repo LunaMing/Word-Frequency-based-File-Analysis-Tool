@@ -62,3 +62,13 @@ def export_neo4j_data():
         traceback.print_exc()
         data = {"error": e}
     return data
+
+
+def import_neo4j(data):
+    print(data)
+
+    paper_title = "title_0"
+    word_name = "word_0"
+    paper = Paper.get_or_create({"title": paper_title})[0]
+    word = Word.get_or_create({"name": word_name}, relationship=paper.word)
+    print(word)
