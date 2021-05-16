@@ -75,7 +75,9 @@ def preprocessing(s: str):
 def total_count(str_list):
     """文本预处理、fit统计词频、transform计算tf-idf归一化矩阵、保存到csv"""
     print("-- Fit and transform -> tf-idf feature matrix --")
-    vectoriser = TfidfVectorizer()
+    # 0.7 最大频率 限制频率过高的词语，以代替停用词表
+    # 0.4 最小频率 限制频率过低的词语，只保留具有普适性英文意义的词，而不是新创系统缩写“NEL”之类的
+    vectoriser = TfidfVectorizer(max_df=0.7, min_df=0.4)
     X_train = vectoriser.fit_transform(str_list)
 
     print("-- sparse matrix -> DataFrame --")
