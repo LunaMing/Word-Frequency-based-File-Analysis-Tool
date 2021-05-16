@@ -210,6 +210,19 @@ if __name__ == '__main__':
     bigram_vectorizer = CountVectorizer(ngram_range=(1, 2), token_pattern=r'\b\w+\b', min_df=1)
     analyze = bigram_vectorizer.build_analyzer()
     bi_ana_outcome = analyze('Bi-grams are cool!')
-    print(bi_ana_outcome)
+    # print(bi_ana_outcome)
+
+    # 解决局部定位模式中编码的歧义
+    corpus = [
+        'This is the first document.',
+        'This is the second second document.',
+        'And the third one.',
+        'Is this the first document?',
+    ]
+    X_2 = bigram_vectorizer.fit_transform(corpus)
+    feature_name_2_list = bigram_vectorizer.get_feature_names()
+    print(feature_name_2_list)
+    X_array_2 = X_2.toarray()
+    print(X_array_2)
 
     exit()
