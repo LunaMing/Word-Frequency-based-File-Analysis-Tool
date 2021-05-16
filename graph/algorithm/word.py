@@ -213,12 +213,6 @@ if __name__ == '__main__':
     # print(bi_ana_outcome)
 
     # 解决局部定位模式中编码的歧义
-    corpus = [
-        'This is the first document.',
-        'This is the second second document.',
-        'And the third one.',
-        'Is this the first document?',
-    ]
     X_2_fit_outcome = bigram_vectorizer.fit_transform(corpus)
     feature_name_2_list = bigram_vectorizer.get_feature_names()
     # print(feature_name_2_list)
@@ -252,6 +246,17 @@ if __name__ == '__main__':
 
     # 每个特征的权重被存储在一个模型属性中
     model_tfidf = transformer.idf_
-    print(model_tfidf)
+    # print(model_tfidf)
+
+    #  TfidfVectorizer 将 CountVectorizer 和 TfidfTransformer 的所有选项组合在一个模型中
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
+    vectorizer = TfidfVectorizer()
+    tfidf_fit_outcome = vectorizer.fit_transform(corpus)
+    print(tfidf_fit_outcome)
+
+    tfidf_fit_outcome_array = tfidf_fit_outcome.toarray()
+    print(vectorizer.get_feature_names())
+    print(tfidf_fit_outcome_array)
 
     exit()
