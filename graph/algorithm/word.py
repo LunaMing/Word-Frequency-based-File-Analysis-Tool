@@ -74,37 +74,45 @@ def preprocessing(s: str):
 
 def total_count(str_list):
     """文本预处理、fit统计词频、transform计算tf-idf归一化矩阵、保存到csv"""
-    print("-- Fit to the data and transform to tf-idf feature matrix --")
+    print("-- Fit and transform -> tf-idf feature matrix --")
     vectoriser = TfidfVectorizer()
     X_train = vectoriser.fit_transform(str_list)
 
-    print("-- Convert sparse matrix to pandas DataFrame --")
+    print("-- sparse matrix -> DataFrame --")
     X_train = pd.DataFrame.sparse.from_spmatrix(X_train)
     # 统计 行数、列数
-    c1 = X_train.shape[0]
-    c2 = X_train.shape[1]
-    print("Document: " + str(c1) + " Word: " + str(c2))
+    document_num = X_train.shape[0]
+    word_num_total = X_train.shape[1]
+    print("Document: " + str(document_num) + " Word: " + str(word_num_total))
 
-    print("-- Rename each column with word using the mapping --")
-    col_map = {v: k for k, v in vectoriser.vocabulary_.items()}
-    for col in X_train.columns:
-        X_train.rename(columns={col: col_map[col]}, inplace=True)
-
-    print("-- Adjusting data content: T * --")
+    print("-- Adjusting data: T * --")
     # 转置
     X_T = X_train.T
     # 每一项都乘系数放大
     X_T_multiple = X_T * 100
 
+    print("-- Export to csv file --")
+    X_T_multiple.to_csv("output/total.csv")
+
     print("-- Top N --")
     N = 3
-    for i in range(c1):
+    document_top_n = []
+    for i in range(document_num):
         # 第i个文档的 top N
         top_n = X_T_multiple.nlargest(N, i)
-        print(top_n)
-
-    print("-- Export matrix transpose results to csv file --")
-    X_T_multiple.to_csv("output/total.csv")
+        # 转置
+        top_n_t = top_n.T
+        # 取列名
+        top_n_index = list(top_n_t)
+        top_word_list = []
+        for index in top_n_index:
+            # 倒转单词字典里面的kv
+            col_map = {v: k for k, v in vectoriser.vocabulary_.items()}
+            # 利用字典映射出单词拼写
+            top_word = col_map.get(index)
+            top_word_list.append(top_word)
+        document_top_n.append(top_word_list)
+    print(document_top_n)
 
     return X_T_multiple
 
@@ -122,10 +130,8 @@ def word_freq():
         raw_str = ""
         for page in pdf:
             raw_str += str(page)
-        # 预处理
-        s = preprocessing_str(raw_str)
         # 计入总字符集
-        total_str_list.append(s)
+        total_str_list.append(raw_str)
 
     # 统计
     total_count(total_str_list)
