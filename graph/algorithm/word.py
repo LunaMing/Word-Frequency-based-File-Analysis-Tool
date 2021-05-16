@@ -74,22 +74,26 @@ def preprocessing(s: str):
 
 def total_count(str_list):
     """机器学习统计"""
-    colname = 'nsdi'
-
-    print("-- Create a dataframe --")
-    X_train = pd.DataFrame(str_list, columns=[colname])
-    print(X_train)
+    # colname = 'nsdi'
+    #
+    # print("-- Create a dataframe --")
+    # X_train = pd.DataFrame(str_list, columns=[colname])
+    # print(X_train)
 
     print("-- Create an instance of TfidfVectorizer --")
-    vectoriser = TfidfVectorizer(analyzer=preprocessing)
+    vectoriser = TfidfVectorizer()
     print("-- Fit to the data and transform to feature matrix --")
-    X_train = vectoriser.fit_transform(X_train[colname])
-    print(X_train)
-
-    # print("-- Convert sparse matrix to dataframe --")
-    # X_train = pd.DataFrame.sparse.from_spmatrix(X_train)
+    X_train = vectoriser.fit_transform(str_list)
     # print(X_train)
-    #
+
+    print("-- Convert sparse matrix to dataframe --")
+    X_train = pd.DataFrame.sparse.from_spmatrix(X_train)
+    # print(X_train)
+
+    # 第一行
+    first_row = X_train.loc[0]
+    print(first_row)
+
     # # Save mapping on which index refers to which words
     # col_map = {v: k for k, v in vectoriser.vocabulary_.items()}
     # print("--Rename each column using the mapping--")
