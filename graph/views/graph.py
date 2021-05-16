@@ -1,18 +1,29 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 
-from views.controller import export_neo4j_data
+from algorithm import export_neo4j_data, word_freq, read_pdf_names, import_neo4j
 
 
 def get_new_graph(request):
-    template = loader.get_template('graph/index.html')
+    pdf_list = []
+    # 读取pdf文件名
+    pdf_path_list = read_pdf_names()
+    for pdf_path in pdf_path_list:
+        # res\pdf\nsdi20spring_cheng_prepub_0.pdf
+        pdf_name = pdf_path.lstrip("res\\pdf\\")
+        pdf_list.append(pdf_name)
+    # 词频统计
+    doc_word_list = word_freq(pdf_path_list)
 
-    pdf_list = ["nsdi20spring_arashloo_prepub.pdf", "nsdi20spring_birkner_prepub.pdf"]
+    # 导入数据库
+    import_neo4j(pdf_list, doc_word_list)
 
+    # 图谱
     res = export_neo4j_data()
     node_list = []
     link_list = []
     data_to_node_and_link(res, node_list, link_list)
+    template = loader.get_template('graph/index.html')
 
     context = {
         'pdfs': pdf_list,
@@ -81,10 +92,30 @@ def data_to_node_and_link(res, node_list, link_list):
                 "target": word_id
             }
             link_list.append(link)
+    # 打印调试节点
+    # print("--node--")
+    # for node in node_list:
+    #     print(node)
+    # print("--link--")
+    # for link in link_list:
+    #     print(link)
 
-    print("--node--")
-    for node in node_list:
-        print(node)
-    print("--link--")
-    for link in link_list:
-        print(link)
+
+def get_count_json(r):
+    res = [
+        {
+            "paper": "pdf1",
+            "words":
+                [
+                    {
+                        "word": "word1",
+                        "num": 55.5
+                    },
+                    {
+                        "word": "word2",
+                        "num": 44.4
+                    }
+                ]
+        }
+    ]
+    return JsonResponse(res, safe=False)

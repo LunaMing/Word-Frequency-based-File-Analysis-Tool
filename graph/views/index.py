@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 
-from views.controller import get_all_kind, export_neo4j_data
+from algorithm import get_all_kind, export_neo4j_data
 
 
 def get_index(request):

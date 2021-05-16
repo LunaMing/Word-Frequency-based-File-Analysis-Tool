@@ -1,6 +1,6 @@
 import traceback
 
-from graph.models import Author, Paper, Word
+from graph.models import Author, Paper, Word, Contain
 
 
 def get_all_kind(kind):
@@ -62,3 +62,16 @@ def export_neo4j_data():
         traceback.print_exc()
         data = {"error": e}
     return data
+
+
+def import_neo4j(paper_data, word_data):
+    print(paper_data)
+    print(word_data)
+
+    for i in range(len(paper_data)):
+        paper_title = paper_data[i]
+        paper = Paper.get_or_create({"title": paper_title})[0]
+        word_list = word_data[i]
+        for word_name in word_list:
+            word = Word.get_or_create({"name": word_name})[0]
+            paper.word.connect(word)
