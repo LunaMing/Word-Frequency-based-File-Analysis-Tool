@@ -80,32 +80,33 @@ def total_count(str_list):
 
     print("-- Convert sparse matrix to pandas DataFrame --")
     X_train = pd.DataFrame.sparse.from_spmatrix(X_train)
+    # 统计 行数、列数
+    c1 = X_train.shape[0]
+    c2 = X_train.shape[1]
+    print("Document: " + str(c1) + " Word: " + str(c2))
 
     print("-- Rename each column with word using the mapping --")
     col_map = {v: k for k, v in vectoriser.vocabulary_.items()}
     for col in X_train.columns:
         X_train.rename(columns={col: col_map[col]}, inplace=True)
 
-    # 统计最后的行数、列数
-    c1 = X_train.shape[0]
-    c2 = X_train.shape[1]
-    print("Document: " + str(c1) + " Word: " + str(c2))
-
-    print("-- Export matrix transpose results to csv file --")
+    print("-- Adjusting data content: T * --")
     # 转置
     X_T = X_train.T
-    # 每一项都乘
+    # 每一项都乘系数放大
     X_T_multiple = X_T * 100
-    X_T_multiple.to_csv("output/total.csv")
 
-    print(X_T_multiple)
+    print("-- Top N --")
     N = 3
     for i in range(c1):
         # 第i个文档的 top N
         top_n = X_T_multiple.nlargest(N, i)
         print(top_n)
 
-    return X_train
+    print("-- Export matrix transpose results to csv file --")
+    X_T_multiple.to_csv("output/total.csv")
+
+    return X_T_multiple
 
 
 def word_freq():
