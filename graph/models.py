@@ -38,3 +38,20 @@ class Author(StructuredNode):
     name = StringProperty(unique_index=True, required=True)
 
     paper = RelationshipTo(Paper, "WRITE")
+
+class Dog(StructuredNode):
+    name = StringProperty(required=True)
+    owner = RelationshipTo('Person', 'owner')
+
+class Person(StructuredNode):
+    name = StringProperty(unique_index=True)
+    pets = RelationshipFrom('Dog', 'owner')
+
+bob = Person.get_or_create({"name": "Bob"})[0]
+bobs_gizmo = Dog.get_or_create({"name": "Gizmo"}, relationship=bob.pets)
+
+tim = Person.get_or_create({"name": "Tim"})[0]
+tims_gizmo = Dog.get_or_create({"name": "Gizmo"}, relationship=tim.pets)
+
+# not the same gizmo
+assert bobs_gizmo[0] != tims_gizmo[0]
