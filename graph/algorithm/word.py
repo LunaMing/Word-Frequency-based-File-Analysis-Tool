@@ -86,6 +86,11 @@ def total_count(str_list):
     for col in X_train.columns:
         X_train.rename(columns={col: col_map[col]}, inplace=True)
 
+    # 统计最后的行数、列数
+    c1 = X_train.shape[0]
+    c2 = X_train.shape[1]
+    print("Document: " + str(c1) + " Word: " + str(c2))
+
     print("-- Export matrix transpose results to csv file --")
     X_train.T.to_csv("output/total.csv")
 
@@ -93,7 +98,7 @@ def total_count(str_list):
 
 
 def word_freq():
-    pdf_name_list = ["nsdi20spring_arashloo_prepub", "nsdi20spring_birkner_prepub"]
+    pdf_name_list = ["nsdi20spring_arashloo_prepub", "nsdi20spring_birkner_prepub", "nsdi20spring_burnett_prepub"]
 
     total_str_list = []
     for pdf_name in pdf_name_list:
