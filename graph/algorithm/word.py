@@ -122,7 +122,7 @@ def total_count(str_list):
     X_train = pd.DataFrame(str_list, columns=[colname])
     print(X_train)
 
-    # Create an instance of TfidfVectorizer
+    print("-- Create an instance of TfidfVectorizer --")
     vectoriser = TfidfVectorizer(analyzer=preprocessing)
     print("-- Fit to the data and transform to feature matrix --")
     X_train = vectoriser.fit_transform(X_train[colname])
@@ -171,3 +171,92 @@ def word_freq():
     for s in total_str_list:
         total_str += s
     cloud(total_str, "total.png")
+    
+
+if __name__ == '__main__':
+    from sklearn.feature_extraction.text import CountVectorizer
+
+    # 标记和计算文本文档的最小语料库中出现的单词
+    vectorizer = CountVectorizer()
+    corpus = [
+        'This is the first document.',
+        'This is the second second document.',
+        'And the third one.',
+        'Is this the first document?',
+    ]
+    X_fit_trans_outcome = vectorizer.fit_transform(corpus)
+    # print(X_fit_trans_outcome)
+
+    # 默认配置通过提取至少两个字母的单词来标记字符串
+    analyze = vectorizer.build_analyzer()
+    word_bag_list = analyze("This is a text document to analyze.")
+    # print(word_bag_list)
+
+    # 分析器在匹配过程中发现的每个术语都被分配一个唯一的整数索引，该索引对应于结果矩阵中的一个列
+    feature_name_list = vectorizer.get_feature_names()
+    # print(feature_name_list)
+    X_matrix = X_fit_trans_outcome.toarray()
+    # print(X_matrix)
+
+    # 从特征名到列索引的反向映射存储在向量器的 vocabulary_ 属性中
+    word_dict = vectorizer.vocabulary_
+    # print(word_dict)
+
+    # 未在训练语料库中出现的单词将在未来调用转换方法时被完全忽略
+    array_test = vectorizer.transform(['Something completely new.']).toarray()
+    # print(array_test)
+
+    # 保存一些局部的排序信息, 2-grams
+    bigram_vectorizer = CountVectorizer(ngram_range=(1, 2), token_pattern=r'\b\w+\b', min_df=1)
+    analyze = bigram_vectorizer.build_analyzer()
+    bi_ana_outcome = analyze('Bi-grams are cool!')
+    # print(bi_ana_outcome)
+
+    # 解决局部定位模式中编码的歧义
+    X_2_fit_outcome = bigram_vectorizer.fit_transform(corpus)
+    feature_name_2_list = bigram_vectorizer.get_feature_names()
+    # print(feature_name_2_list)
+    X_2 = X_2_fit_outcome.toarray()
+    # print(X_2)
+
+    #  “Is this” 只出现在最后一份文件中
+    feature_index = bigram_vectorizer.vocabulary_.get('is this')
+    array_is_this = X_2[:, feature_index]
+    # print(array_is_this)
+
+    # 规范化由 TfidfTransformer 类实现
+    from sklearn.feature_extraction.text import TfidfTransformer
+
+    transformer = TfidfTransformer(smooth_idf=False)
+    counts = [[3, 0, 1],
+              [2, 0, 0],
+              [3, 0, 0],
+              [4, 0, 0],
+              [3, 2, 0],
+              [3, 0, 2]]
+    tfidf = transformer.fit_transform(counts)
+    # 稀疏矩阵
+    # print(tfidf)
+    tfidf_array = tfidf.toarray()
+    # print(tfidf_array)
+
+    transformer = TfidfTransformer()
+    tfidf_array_smooth = transformer.fit_transform(counts).toarray()
+    # print(tfidf_array_smooth)
+
+    # 每个特征的权重被存储在一个模型属性中
+    model_tfidf = transformer.idf_
+    # print(model_tfidf)
+
+    #  TfidfVectorizer 将 CountVectorizer 和 TfidfTransformer 的所有选项组合在一个模型中
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
+    vectorizer = TfidfVectorizer()
+    tfidf_fit_outcome = vectorizer.fit_transform(corpus)
+    print(tfidf_fit_outcome)
+
+    tfidf_fit_outcome_array = tfidf_fit_outcome.toarray()
+    print(vectorizer.get_feature_names())
+    print(tfidf_fit_outcome_array)
+
+    exit()
