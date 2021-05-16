@@ -98,6 +98,11 @@ def total_count(str_list):
     X_T_multiple = X_T * 100
     X_T_multiple.to_csv("output/total.csv")
 
+    print(X_T_multiple)
+    # 第一个文档的 top 3
+    larg = X_T_multiple.nlargest(3, 0)
+    print(larg)
+
     return X_train
 
 
