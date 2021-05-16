@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import pdftotext
 from nltk import pos_tag
@@ -120,17 +122,21 @@ def total_count(str_list):
 
 
 def word_freq():
-    pdf_name_list = ["nsdi20spring_arashloo_prepub", "nsdi20spring_birkner_prepub", "nsdi20spring_burnett_prepub"]
+    pdf_path_list = []
+    for root, dirs, files in os.walk("res\pdf", topdown=False):
+        for name in files:
+            pdf_path = os.path.join(root, name)
+            pdf_path_list.append(pdf_path)
 
     total_str_list = []
-    for pdf_name in pdf_name_list:
-        print("PDF: " + pdf_name)
+    for pdf_path in pdf_path_list:
+        print("PDF: " + pdf_path)
         # 读取pdf文件
-        pdf_path = "res/pdf/" + pdf_name + ".pdf"
         with open(pdf_path, "rb") as f:
             pdf = pdftotext.PDF(f)
         raw_str = ""
         for page in pdf:
+            raw_str += ' '
             raw_str += str(page)
         # 计入总字符集
         total_str_list.append(raw_str)
@@ -138,8 +144,8 @@ def word_freq():
     # 统计词频
     doc_word_list = total_count(total_str_list)
 
-    for i in range(len(pdf_name_list)):
-        print(pdf_name_list[i]+".pdf")
+    for i in range(len(pdf_path_list)):
+        print(pdf_path_list[i])
         print(doc_word_list[i])
 
     # 词云
