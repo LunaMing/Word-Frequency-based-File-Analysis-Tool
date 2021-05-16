@@ -73,40 +73,21 @@ def preprocessing(s: str):
 
 
 def total_count(str_list):
-    """机器学习统计"""
-    # colname = 'nsdi'
-    #
-    # print("-- Create a dataframe --")
-    # X_train = pd.DataFrame(str_list, columns=[colname])
-    # print(X_train)
-
-    print("-- Create an instance of TfidfVectorizer --")
+    """文本预处理、fit统计词频、transform计算tf-idf归一化矩阵、保存到csv"""
+    print("-- Fit to the data and transform to tf-idf feature matrix --")
     vectoriser = TfidfVectorizer()
-    print("-- Fit to the data and transform to feature matrix --")
     X_train = vectoriser.fit_transform(str_list)
-    # print(X_train)
 
-    print("-- Convert sparse matrix to dataframe --")
-    df = pd.DataFrame.sparse.from_spmatrix(X_train)
-    # print(X_train)
+    print("-- Convert sparse matrix to pandas DataFrame --")
+    X_train = pd.DataFrame.sparse.from_spmatrix(X_train)
 
-    # 第一行
-    first_row = df.loc[0]
-    # print(first_row)
+    print("-- Rename each column with word using the mapping --")
+    col_map = {v: k for k, v in vectoriser.vocabulary_.items()}
+    for col in X_train.columns:
+        X_train.rename(columns={col: col_map[col]}, inplace=True)
 
-    # 每一行词语密度
-    for i in range(df.shape[0]):
-        print(df.loc[i].sparse.density)
-
-    # # Save mapping on which index refers to which words
-    # col_map = {v: k for k, v in vectoriser.vocabulary_.items()}
-    # print("--Rename each column using the mapping--")
-    # for col in X_train.columns:
-    #     X_train.rename(columns={col: col_map[col]}, inplace=True)
-    # print(X_train)
-
-    # # 输出结果到文件
-    # X_train.to_csv("output/total.csv")
+    print("-- Export matrix transpose results to csv file --")
+    X_train.T.to_csv("output/total.csv")
 
     return X_train
 
