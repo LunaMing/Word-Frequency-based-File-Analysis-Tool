@@ -227,7 +227,23 @@ if __name__ == '__main__':
 
     #  “Is this” 只出现在最后一份文件中
     feature_index = bigram_vectorizer.vocabulary_.get('is this')
-    temp_array_is_this = X_2[:, feature_index]
-    print(temp_array_is_this)
+    array_is_this = X_2[:, feature_index]
+    # print(array_is_this)
+
+    # 规范化由 TfidfTransformer 类实现
+    from sklearn.feature_extraction.text import TfidfTransformer
+
+    transformer = TfidfTransformer(smooth_idf=False)
+    counts = [[3, 0, 1],
+              [2, 0, 0],
+              [3, 0, 0],
+              [4, 0, 0],
+              [3, 2, 0],
+              [3, 0, 2]]
+    tfidf = transformer.fit_transform(counts)
+    # 稀疏矩阵
+    print(tfidf)
+    tfidf_array = tfidf.toarray()
+    print(tfidf_array)
 
     exit()
