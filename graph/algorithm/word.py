@@ -122,7 +122,7 @@ def total_count(str_list):
     X_train = pd.DataFrame(str_list, columns=[colname])
     print(X_train)
 
-    # Create an instance of TfidfVectorizer
+    print("-- Create an instance of TfidfVectorizer --")
     vectoriser = TfidfVectorizer(analyzer=preprocessing)
     print("-- Fit to the data and transform to feature matrix --")
     X_train = vectoriser.fit_transform(X_train[colname])
@@ -171,3 +171,17 @@ def word_freq():
     for s in total_str_list:
         total_str += s
     cloud.cloud(total_str, "total.png")
+
+
+if __name__ == '__main__':
+    from sklearn.feature_extraction.text import CountVectorizer
+
+    vectorizer = CountVectorizer()
+    corpus = [
+        'This is the first document.',
+        'This is the second second document.',
+        'And the third one.',
+        'Is this the first document?',
+    ]
+    X = vectorizer.fit_transform(corpus)
+    print(X)
