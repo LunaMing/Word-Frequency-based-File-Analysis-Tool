@@ -121,17 +121,22 @@ def total_count(str_list):
     return document_top_n
 
 
-def word_freq():
+def read_pdf_names():
     pdf_path_list = []
-    for root, dirs, files in os.walk("res\pdf", topdown=False):
+    for root, dirs, files in os.walk("res\\pdf"):
         for name in files:
             pdf_path = os.path.join(root, name)
             pdf_path_list.append(pdf_path)
+    return pdf_path_list
 
+
+def word_freq():
+    pdf_path_list = read_pdf_names()
+
+    # 读取pdf文件
     total_str_list = []
     for pdf_path in pdf_path_list:
-        print("PDF: " + pdf_path)
-        # 读取pdf文件
+        # print("PDF: " + pdf_path)
         with open(pdf_path, "rb") as f:
             pdf = pdftotext.PDF(f)
         raw_str = ""
