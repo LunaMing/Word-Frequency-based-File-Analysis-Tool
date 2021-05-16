@@ -7,7 +7,7 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from algorithm import picture
+from algorithm import cloud
 
 
 def preprocessing_str(s: str):
@@ -146,10 +146,9 @@ def total_count(str_list):
 
 
 def word_freq():
-    total_str = ""
-    total_str_list = []
-
     pdf_name_list = ["nsdi20spring_arashloo_prepub", "nsdi20spring_birkner_prepub"]
+
+    total_str_list = []
     for pdf_name in pdf_name_list:
         print("PDF: " + pdf_name)
         # 读取pdf文件
@@ -162,11 +161,13 @@ def word_freq():
         # 预处理
         s = preprocessing_str(raw_str)
         # 计入总字符集
-        total_str += s
         total_str_list.append(s)
 
     # 统计
-    # word.count(total_str, "total.txt")
-    word.total_count(total_str_list)
-    # 可视化
-    picture.cloud(total_str, "total.png")
+    total_count(total_str_list)
+
+    # 词云
+    total_str = ""
+    for s in total_str_list:
+        total_str += s
+    cloud.cloud(total_str, "total.png")
