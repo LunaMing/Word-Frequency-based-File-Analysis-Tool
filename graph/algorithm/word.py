@@ -244,10 +244,14 @@ if __name__ == '__main__':
     # 稀疏矩阵
     # print(tfidf)
     tfidf_array = tfidf.toarray()
-    print(tfidf_array)
+    # print(tfidf_array)
 
     transformer = TfidfTransformer()
     tfidf_array_smooth = transformer.fit_transform(counts).toarray()
-    print(tfidf_array_smooth)
+    # print(tfidf_array_smooth)
+
+    # 每个特征的权重被存储在一个模型属性中
+    model_tfidf = transformer.idf_
+    print(model_tfidf)
 
     exit()
