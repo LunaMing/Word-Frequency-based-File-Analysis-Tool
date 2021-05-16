@@ -99,9 +99,11 @@ def total_count(str_list):
     X_T_multiple.to_csv("output/total.csv")
 
     print(X_T_multiple)
-    # 第一个文档的 top 3
-    larg = X_T_multiple.nlargest(3, 0)
-    print(larg)
+    N = 3
+    for i in range(c1):
+        # 第i个文档的 top N
+        top_n = X_T_multiple.nlargest(N, i)
+        print(top_n)
 
     return X_train
 
