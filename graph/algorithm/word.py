@@ -202,4 +202,8 @@ if __name__ == '__main__':
     word_dict = vectorizer.vocabulary_
     # print(word_dict)
 
+    # 未在训练语料库中出现的单词将在未来调用转换方法时被完全忽略
+    array_test = vectorizer.transform(['Something completely new.']).toarray()
+    print(array_test)
+
     exit()
