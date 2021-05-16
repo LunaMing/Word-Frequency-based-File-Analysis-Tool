@@ -1,2 +1,2 @@
-from graph.algorithm.main import *
 from graph.algorithm.controller import *
+from graph.algorithm.word import *
