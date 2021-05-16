@@ -130,9 +130,7 @@ def read_pdf_names():
     return pdf_path_list
 
 
-def word_freq():
-    pdf_path_list = read_pdf_names()
-
+def word_freq(pdf_path_list):
     # 读取pdf文件
     total_str_list = []
     for pdf_path in pdf_path_list:
@@ -152,12 +150,7 @@ def word_freq():
     for i in range(len(pdf_path_list)):
         print(pdf_path_list[i])
         print(doc_word_list[i])
-
-    # 词云
-    # total_str = ""
-    # for s in total_str_list:
-    #     total_str += s
-    # draw_cloud(total_str, "total.png")
+    return doc_word_list
 
 
 if __name__ == '__main__':

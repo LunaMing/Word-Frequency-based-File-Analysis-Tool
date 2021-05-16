@@ -13,7 +13,15 @@ def get_new_graph(request):
         pdf_name = pdf_path.lstrip("res\\pdf\\")
         pdf_list.append(pdf_name)
     # 词频统计
-    word_freq()
+    doc_word_list = word_freq(pdf_path_list)
+
+    print("0 paper title:")
+    print(pdf_list[0])
+    print("0 doc 0 word")
+    print(doc_word_list[0][0])
+    print("0 doc 1 word")
+    print(doc_word_list[0][1])
+
     # 图谱
     res = export_neo4j_data()
     node_list = []
