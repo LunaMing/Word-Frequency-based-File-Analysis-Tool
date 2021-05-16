@@ -87,12 +87,16 @@ def total_count(str_list):
     # print(X_train)
 
     print("-- Convert sparse matrix to dataframe --")
-    X_train = pd.DataFrame.sparse.from_spmatrix(X_train)
+    df = pd.DataFrame.sparse.from_spmatrix(X_train)
     # print(X_train)
 
     # 第一行
-    first_row = X_train.loc[0]
-    print(first_row)
+    first_row = df.loc[0]
+    # print(first_row)
+
+    # 每一行词语密度
+    for i in range(df.shape[0]):
+        print(df.loc[i].sparse.density)
 
     # # Save mapping on which index refers to which words
     # col_map = {v: k for k, v in vectoriser.vocabulary_.items()}
