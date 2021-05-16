@@ -219,10 +219,15 @@ if __name__ == '__main__':
         'And the third one.',
         'Is this the first document?',
     ]
-    X_2 = bigram_vectorizer.fit_transform(corpus)
+    X_2_fit_outcome = bigram_vectorizer.fit_transform(corpus)
     feature_name_2_list = bigram_vectorizer.get_feature_names()
-    print(feature_name_2_list)
-    X_array_2 = X_2.toarray()
-    print(X_array_2)
+    # print(feature_name_2_list)
+    X_2 = X_2_fit_outcome.toarray()
+    # print(X_2)
+
+    #  “Is this” 只出现在最后一份文件中
+    feature_index = bigram_vectorizer.vocabulary_.get('is this')
+    temp_array_is_this = X_2[:, feature_index]
+    print(temp_array_is_this)
 
     exit()
