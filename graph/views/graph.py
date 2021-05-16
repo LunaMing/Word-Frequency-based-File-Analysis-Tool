@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 
 from algorithm import export_neo4j_data, word_freq, read_pdf_names
@@ -95,3 +95,23 @@ def data_to_node_and_link(res, node_list, link_list):
     # print("--link--")
     # for link in link_list:
     #     print(link)
+
+
+def get_count_json(r):
+    res = [
+        {
+            "paper": "pdf1",
+            "words":
+                [
+                    {
+                        "word": "word1",
+                        "num": 55.5
+                    },
+                    {
+                        "word": "word2",
+                        "num": 44.4
+                    }
+                ]
+        }
+    ]
+    return JsonResponse(res, safe=False)
