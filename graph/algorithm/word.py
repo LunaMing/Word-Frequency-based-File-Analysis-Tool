@@ -184,4 +184,8 @@ if __name__ == '__main__':
         'Is this the first document?',
     ]
     X = vectorizer.fit_transform(corpus)
-    print(X)
+    # print(X)
+
+    analyze = vectorizer.build_analyzer()
+    word_bag_list = analyze("This is a text document to analyze.")
+    print(word_bag_list)
