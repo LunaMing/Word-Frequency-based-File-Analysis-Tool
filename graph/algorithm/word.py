@@ -5,9 +5,7 @@ from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
-from sklearn.feature_extraction.text import TfidfVectorizer
-
-from algorithm import cloud
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
 
 
 def preprocessing_str(s: str):
@@ -74,46 +72,6 @@ def preprocessing(s: str):
     return word_list
 
 
-def count(raw_txt: str, out_file: str):
-    """统计文本频率"""
-    print("-- COUNT --")
-
-    # 拆分字符串
-    word_list = raw_txt.split()
-    total_word_num = len(word_list)
-
-    # 统计
-    counts = {word: word_list.count(word) for word in set(word_list)}
-
-    # freqs = {word: float(word_list.count(word) / total_word_num) for word in set(word_list)}
-
-    # 排序
-    items = list(counts.items())
-    items.sort(key=lambda x: x[1], reverse=True)
-
-    # 高频阈值：能作为高频候选词的最少出现次数
-    LEAST_COUNT = 3
-    # 没有超过阈值的不计入高频词候选集
-    keys = []
-    for item in items:
-        if item[1] > LEAST_COUNT:
-            keys.append(item)
-
-    key_num = len(keys)
-
-    # 打印topN看一下结果
-    top = items[:5]
-    print(top)
-
-    # 输出结果到文件
-    fo = open("output/" + out_file, "w", encoding='UTF-8')
-    fo.write("total word num: " + str(total_word_num) + "\n")
-    fo.write("candidate keyword num: " + str(key_num) + "\n")
-    for key in keys:
-        fo.write(str(key) + "\n")
-    fo.close()
-
-
 def total_count(str_list):
     """机器学习统计"""
     colname = 'nsdi'
@@ -167,15 +125,13 @@ def word_freq():
     total_count(total_str_list)
 
     # 词云
-    total_str = ""
-    for s in total_str_list:
-        total_str += s
-    cloud(total_str, "total.png")
-    
+    # total_str = ""
+    # for s in total_str_list:
+    #     total_str += s
+    # draw_cloud(total_str, "total.png")
+
 
 if __name__ == '__main__':
-    from sklearn.feature_extraction.text import CountVectorizer
-
     # 标记和计算文本文档的最小语料库中出现的单词
     vectorizer = CountVectorizer()
     corpus = [
@@ -225,7 +181,6 @@ if __name__ == '__main__':
     # print(array_is_this)
 
     # 规范化由 TfidfTransformer 类实现
-    from sklearn.feature_extraction.text import TfidfTransformer
 
     transformer = TfidfTransformer(smooth_idf=False)
     counts = [[3, 0, 1],
@@ -249,7 +204,6 @@ if __name__ == '__main__':
     # print(model_tfidf)
 
     #  TfidfVectorizer 将 CountVectorizer 和 TfidfTransformer 的所有选项组合在一个模型中
-    from sklearn.feature_extraction.text import TfidfVectorizer
 
     vectorizer = TfidfVectorizer()
     tfidf_fit_outcome = vectorizer.fit_transform(corpus)
