@@ -16,7 +16,7 @@ def get_new_graph(request):
     doc_word_list = word_freq(pdf_path_list)
 
     # 导入数据库
-    import_neo4j(doc_word_list)
+    import_neo4j(pdf_list, doc_word_list)
 
     # 图谱
     res = export_neo4j_data()

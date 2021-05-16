@@ -17,7 +17,7 @@ class Word(StructuredNode):
 
 
 class Contain(StructuredRel):
-    number = IntegerProperty(required=True)
+    number = IntegerProperty()
 
 
 class Paper(StructuredNode):
