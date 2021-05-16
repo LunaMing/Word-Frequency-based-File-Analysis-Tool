@@ -107,7 +107,7 @@ def get_paper_info(browser, paper_url):
 
 
 def output_csv(dict_data):
-    csv_file_path = "../output/paper_info.csv"
+    csv_file_path = "output/paper_info.csv"
     csv_columns = ['Title', 'Author', 'School', 'Abstract']
     with open(csv_file_path, 'w', encoding='UTF-8', newline='') as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=csv_columns)
