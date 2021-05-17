@@ -37,6 +37,7 @@
 
 <div id="left">
     <form action="/upload" method="post" enctype="multipart/form-data">
+         {% csrf_token %}
         <input type="file" name="fafafa">
         <input type="submit">
     </form>
