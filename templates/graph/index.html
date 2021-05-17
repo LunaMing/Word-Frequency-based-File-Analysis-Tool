@@ -12,8 +12,22 @@
     <!-- 引入主题 -->
     <script src="https://www.runoob.com/static/js/wonderland.js"></script>
     <style>
-        .button {
+        .start_button {
             background-color: #09A9E6;
+            border: none;
+            color: white;
+            padding: 13px 26px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .clear_button {
+            background-color: #ed6a67;
             border: none;
             color: white;
             padding: 13px 26px;
@@ -36,23 +50,22 @@
 </div>
 
 <div id="left">
+    <a href="/.." class="clear_button" id="clear_btn" onclick="refreshData(null)">Clear All</a>
+    <a href="/start" class="start_button" id="start_btn">Start ></a>
+    <h3>Files</h3>
     <form action="/upload" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <input id="fileUpload" Style="visibility: hidden" type="file" name="fafafa">
-        <input id="submit_btn" Style="visibility: hidden" type="submit">
-        <br>
         <i style="padding: 10px" class="fa fa-plus" onclick="fileUpload.click()"> Upload File </i>
         <i style="padding: 10px" class="fa fa-refresh" onclick="submit_btn.click()"> Refresh Files </i>
+        <input id="fileUpload" Style="visibility: hidden" type="file" name="fafafa">
+        <input id="submit_btn" Style="visibility: hidden" type="submit">
     </form>
     <br>
     {% for pdf in pdfs %}
         <img style="float: left; padding-right: 15px; padding-top: 5px;" src="{% static 'graph/icons/pdf.png' %}"
              alt="icon pdf" width="20" height="20">
         {{ pdf }}<br>
-        <br>
     {% endfor %}
-    <a href="/start" class="button" id="start_btn">Start ></a>
-    <a href="/.." class="button" id="clear_btn" onclick="refreshData(null)">Clear Graph</a>
 </div>
 
 <div id="right">
