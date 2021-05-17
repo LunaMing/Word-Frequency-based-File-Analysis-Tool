@@ -1,5 +1,4 @@
 import os
-from random import random
 
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
@@ -112,7 +111,6 @@ def data_to_node_and_link(res, node_list, link_list):
             link_list.append(link)
 
         for word in paper["words"]:
-            size_freq = random()
             word_id = -1
             if word["name"] not in word_set:
                 word_set.add(word["name"])
@@ -122,7 +120,7 @@ def data_to_node_and_link(res, node_list, link_list):
                     "name": word["name"],
                     "symbol": 'circle',
                     "value": node_index,
-                    "symbolSize": 60 * (0.5 + size_freq)
+                    "symbolSize": 60
                 }
                 node_list.append(node_word)
                 node_index += 1
