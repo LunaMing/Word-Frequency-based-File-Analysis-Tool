@@ -37,12 +37,13 @@
 
 <div id="left">
     <form action="/upload" method="post" enctype="multipart/form-data">
-         {% csrf_token %}
-        <input type="file" name="fafafa">
-        <input type="submit">
+        {% csrf_token %}
+        <input id="fileUpload" Style="visibility: hidden" type="file" name="fafafa">
+        <input id="submit_btn" Style="visibility: hidden" type="submit">
+        <br>
+        <i style="padding: 10px" class="fa fa-plus" onclick="fileUpload.click()"> Upload File </i>
+        <i style="padding: 10px" class="fa fa-refresh" onclick="submit_btn.click()"> Refresh Files </i>
     </form>
-    <br>
-    <i style="padding: 10px" class="fa fa-upload"></i> Upload PDF Files <br>
     <br>
     {% for pdf in pdfs %}
         <img style="float: left; padding-right: 15px; padding-top: 5px;" src="{% static 'graph/icons/pdf.png' %}"
