@@ -75,13 +75,24 @@ def upload(request):
         # 读取pdf文件名
         pdf_path_list = read_pdf_names()
         pdf_list = get_pdf_pure_name(pdf_path_list)
+        # 拼凑obj
+        pdf_obj_list = []
+        i = 0
+        for pdf_name in pdf_list:
+            i += 1
+            pdf = {
+                "index": i,
+                "name": pdf_name
+            }
+            pdf_obj_list.append(pdf)
+
         link_list = []
         node_list = []
         cloud_list = []
 
         template = loader.get_template('graph/index.html')
         context = {
-            'pdfs': pdf_list,
+            'pdfs': pdf_obj_list,
             'links': link_list,
             'nodes': node_list,
             'clouds': cloud_list,

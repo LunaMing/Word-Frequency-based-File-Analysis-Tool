@@ -62,9 +62,10 @@
     </form>
     <br>
     {% for pdf in pdfs %}
+        [{{ pdf.index }}]
         <img style="float: left; padding-right: 15px; padding-top: 5px;" src="{% static 'graph/icons/pdf.png' %}"
              alt="icon pdf" width="20" height="20">
-        {{ pdf }}<br>
+        {{ pdf.name }}<br>
         <br>
     {% endfor %}
 </div>
@@ -103,12 +104,9 @@
 
                 legend: { //=========圖表控件
                     show: true,
-                    data: [{
-
-                    }, {
+                    data: [{}, {
                         name: 'Paper',
                         icon: 'diamond',
-
                     }, {
                         name: 'Word',
                         icon: 'circle',
