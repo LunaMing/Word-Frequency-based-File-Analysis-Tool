@@ -18,7 +18,26 @@ def get_pdf_pure_name(pdf_path_list):
 def get_new_graph(request):
     # 读取pdf文件名
     pdf_path_list = read_pdf_names()
+
+    # pdf 小于3个文件 不进入统计函数
+    if len(pdf_path_list) < 3:
+        return JsonResponse({
+            "msg": "The number of PDF files is less than 3,"
+                   " and the word frequency analysis of the conference as a whole cannot be performed."
+                   " Please continue to upload your paper files."},
+            safe=False)
+
     pdf_list = get_pdf_pure_name(pdf_path_list)
+    # 拼凑obj
+    pdf_obj_list = []
+    i = 0
+    for pdf_name in pdf_list:
+        i += 1
+        pdf = {
+            "index": i,
+            "name": pdf_name
+        }
+        pdf_obj_list.append(pdf)
 
     # 词频统计
     doc_word_list = word_freq(pdf_path_list)
@@ -27,14 +46,18 @@ def get_new_graph(request):
     import_neo4j(pdf_list, doc_word_list)
 
     # 词云
-    cloud_list = []
+    cloud_obj_list = []
     cloud_str_list = read_text(pdf_path_list)
     for i in range(len(pdf_path_list)):
         cloud_str = cloud_str_list[i]
         cloud_path = os.path.join("graph", "images", "cloud", str(i) + ".png")
         cloud_draw_path = os.path.join("static", cloud_path)
         draw_cloud(cloud_str, cloud_draw_path)
-        cloud_list.append(cloud_path)
+        obj = {
+            "path": cloud_path,
+            "index": i + 1
+        }
+        cloud_obj_list.append(obj)
 
     # 图谱
     res = export_neo4j_data()
@@ -44,10 +67,10 @@ def get_new_graph(request):
     template = loader.get_template('graph/index.html')
 
     context = {
-        'pdfs': pdf_list,
+        'pdfs': pdf_obj_list,
         'links': link_list,
         'nodes': node_list,
-        'clouds': cloud_list,
+        'clouds': cloud_obj_list,
     }
     return HttpResponse(template.render(context, request))
 
@@ -62,7 +85,7 @@ def data_to_node_and_link(res, node_list, link_list):
         node_paper = {
             "category": 1,
             "name": paper["title"],
-            "symbol": 'rect',
+            "symbol": 'diamond',
             "value": node_index,
             "symbolSize": [30, 20]
         }

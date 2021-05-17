@@ -55,16 +55,17 @@
     <h3>Files</h3>
     <form action="/upload" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <i style="padding: 10px" class="fa fa-plus" onclick="fileUpload.click()"> Upload File </i>
-        <i style="padding: 10px" class="fa fa-refresh" onclick="submit_btn.click()"> Refresh Files </i>
+        <i style="padding: 10px" class="fa fa-plus" onclick="fileUpload.click()"> Select PDF Files </i>
+        <i style="padding: 10px" class="fa fa-refresh" onclick="submit_btn.click()"> Upload & Refresh </i>
         <input id="fileUpload" Style="visibility: hidden" type="file" multiple="multiple" name="fafafa">
         <input id="submit_btn" Style="visibility: hidden" type="submit">
     </form>
     <br>
     {% for pdf in pdfs %}
+        [{{ pdf.index }}]
         <img style="float: left; padding-right: 15px; padding-top: 5px;" src="{% static 'graph/icons/pdf.png' %}"
              alt="icon pdf" width="20" height="20">
-        {{ pdf }}<br>
+        {{ pdf.name }}<br>
         <br>
     {% endfor %}
 </div>
@@ -103,14 +104,9 @@
 
                 legend: { //=========圖表控件
                     show: true,
-                    data: [{
-                        name: 'Author',
-                        icon: 'diamond',
-                        //'circle', 'rect', 'roundRect', 'triangle', 'diamond', 'pin', 'arrow'
-                    }, {
+                    data: [{}, {
                         name: 'Paper',
-                        icon: 'rect',
-
+                        icon: 'diamond',
                     }, {
                         name: 'Word',
                         icon: 'circle',
@@ -223,7 +219,8 @@
         <h2>Word Cloud</h2>
         {% load static %}
         　　 {% for cloud in clouds %}
-        <img src="{% static cloud %}" alt="word cloud">
+        <p style="margin-left: 150px"> [{{ cloud.index }}]</p>
+        <img src="{% static cloud.path %}" alt="word cloud">
         　　 {% endfor %}
     </div>
 </div>
