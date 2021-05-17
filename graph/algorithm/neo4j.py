@@ -67,6 +67,7 @@ def export_neo4j_data():
 
 
 def import_neo4j(paper_data, word_data):
+    clear_neo4j()
     for i in range(len(paper_data)):
         paper_title = paper_data[i]
         paper = Paper.get_or_create({"title": paper_title})[0]
