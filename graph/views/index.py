@@ -1,4 +1,7 @@
+import os
+
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
 from django.template import loader
 
 from algorithm import get_all_kind, export_neo4j_data
@@ -32,3 +35,17 @@ def get_all_authors(r):
 
 def get_all_json(r):
     return JsonResponse(export_neo4j_data(), safe=False)
+
+
+def upload(request):
+    if request.method == 'POST':  # 获取对象
+        obj = request.FILES.get('fafafa')
+        # 上传文件的文件名 　　　　
+        print(obj.name)
+        BASE_DIR = "res"
+        f = open(os.path.join(BASE_DIR, 'pdf', obj.name), 'wb')
+        for chunk in obj.chunks():
+            f.write(chunk)
+        f.close()
+        return HttpResponse('OK')
+    return render(request, 'graph/index.html')
