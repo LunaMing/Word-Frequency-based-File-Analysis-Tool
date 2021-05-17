@@ -1,7 +1,7 @@
 import wordcloud
 
 
-def draw_cloud(raw_str: str, cloud_name: str):
-    w = wordcloud.WordCloud(background_color='white')
+def draw_cloud(raw_str: str, cloud_path: str):
+    w = wordcloud.WordCloud(mode="RGBA", background_color=None, include_numbers=True)
     w.generate(raw_str)
-    w.to_file('output/' + cloud_name)
+    w.to_file(cloud_path)
