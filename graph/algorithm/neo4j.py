@@ -1,6 +1,6 @@
 import traceback
 
-from py2neo import Graph
+from neomodel import clear_neo4j_database, db
 
 from graph.models import Author, Paper, Word
 
@@ -81,5 +81,4 @@ def import_neo4j(paper_data, word_data):
 
 
 def clear_neo4j():
-    graph_3 = Graph("bolt://localhost:7687")
-    graph_3.delete_all()
+    clear_neo4j_database(db)
