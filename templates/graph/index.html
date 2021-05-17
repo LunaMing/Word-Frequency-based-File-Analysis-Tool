@@ -219,7 +219,8 @@
         <h2>Word Cloud</h2>
         {% load static %}
         　　 {% for cloud in clouds %}
-        <img src="{% static cloud %}" alt="word cloud">
+        <p style="margin-left: 150px"> [{{ cloud.index }}]</p>
+        <img src="{% static cloud.path %}" alt="word cloud">
         　　 {% endfor %}
     </div>
 </div>

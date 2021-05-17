@@ -37,14 +37,18 @@ def get_new_graph(request):
     import_neo4j(pdf_list, doc_word_list)
 
     # 词云
-    cloud_list = []
+    cloud_obj_list = []
     cloud_str_list = read_text(pdf_path_list)
     for i in range(len(pdf_path_list)):
         cloud_str = cloud_str_list[i]
         cloud_path = os.path.join("graph", "images", "cloud", str(i) + ".png")
         cloud_draw_path = os.path.join("static", cloud_path)
         draw_cloud(cloud_str, cloud_draw_path)
-        cloud_list.append(cloud_path)
+        obj = {
+            "path": cloud_path,
+            "index": i + 1
+        }
+        cloud_obj_list.append(obj)
 
     # 图谱
     res = export_neo4j_data()
@@ -57,7 +61,7 @@ def get_new_graph(request):
         'pdfs': pdf_obj_list,
         'links': link_list,
         'nodes': node_list,
-        'clouds': cloud_list,
+        'clouds': cloud_obj_list,
     }
     return HttpResponse(template.render(context, request))
 
