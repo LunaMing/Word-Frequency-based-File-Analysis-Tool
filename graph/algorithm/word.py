@@ -130,7 +130,7 @@ def read_pdf_names():
     return pdf_path_list
 
 
-def word_freq(pdf_path_list):
+def read_text(pdf_path_list):
     # 读取pdf文件
     total_str_list = []
     for pdf_path in pdf_path_list:
@@ -143,6 +143,11 @@ def word_freq(pdf_path_list):
             raw_str += str(page)
         # 计入总字符集
         total_str_list.append(raw_str)
+    return total_str_list
+
+
+def word_freq(pdf_path_list):
+    total_str_list = read_text(pdf_path_list)
 
     # 统计词频
     doc_word_list = total_count(total_str_list)
