@@ -18,6 +18,15 @@ def get_pdf_pure_name(pdf_path_list):
 def get_new_graph(request):
     # 读取pdf文件名
     pdf_path_list = read_pdf_names()
+
+    # pdf 小于3个文件 不进入统计函数
+    if len(pdf_path_list) < 3:
+        return JsonResponse({
+            "msg": "The number of PDF files is less than 3,"
+                   " and the word frequency analysis of the conference as a whole cannot be performed."
+                   " Please continue to upload your paper files."},
+            safe=False)
+
     pdf_list = get_pdf_pure_name(pdf_path_list)
     # 拼凑obj
     pdf_obj_list = []
