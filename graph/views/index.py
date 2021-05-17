@@ -4,7 +4,7 @@ import shutil
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 
-from algorithm import get_all_kind, export_neo4j_data, read_pdf_names
+from algorithm import get_all_kind, export_neo4j_data, read_pdf_names, clear_neo4j
 from views import get_pdf_pure_name
 
 
@@ -25,6 +25,7 @@ def get_index(request):
     # 清空pdf文件夹数据
     setDir(os.path.join("res", "pdf"))
     # 清空数据库数据
+    clear_neo4j()
 
     pdf_list = []
     link_list = []
