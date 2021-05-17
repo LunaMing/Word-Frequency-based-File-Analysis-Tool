@@ -28,7 +28,7 @@ def get_new_graph(request):
 
     # 词云
     cloud_index = 1
-    draw_cloud(str(doc_word_list), os.path.join("output", "cloud", str(cloud_index) + ".png"))
+    draw_cloud(str(doc_word_list), os.path.join("static", "graph", "images", "cloud", str(cloud_index) + ".png"))
 
     # 图谱
     res = export_neo4j_data()
