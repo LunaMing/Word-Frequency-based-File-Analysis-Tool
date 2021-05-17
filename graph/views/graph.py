@@ -62,7 +62,7 @@ def data_to_node_and_link(res, node_list, link_list):
         node_paper = {
             "category": 1,
             "name": paper["title"],
-            "symbol": 'rect',
+            "symbol": 'diamond',
             "value": node_index,
             "symbolSize": [30, 20]
         }
