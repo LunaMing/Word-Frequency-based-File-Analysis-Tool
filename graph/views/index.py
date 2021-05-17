@@ -1,10 +1,10 @@
 import os
 
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
 from django.template import loader
 
-from algorithm import get_all_kind, export_neo4j_data
+from algorithm import get_all_kind, export_neo4j_data, read_pdf_names
+from views import get_pdf_pure_name
 
 
 def get_index(request):
@@ -47,5 +47,17 @@ def upload(request):
         for chunk in obj.chunks():
             f.write(chunk)
         f.close()
-        return HttpResponse('OK')
-    return render(request, 'graph/index.html')
+
+        # 读取pdf文件名
+        pdf_path_list = read_pdf_names()
+        pdf_list = get_pdf_pure_name(pdf_path_list)
+        link_list = []
+        node_list = []
+
+        template = loader.get_template('graph/index.html')
+        context = {
+            'pdfs': pdf_list,
+            'links': link_list,
+            'nodes': node_list,
+        }
+        return HttpResponse(template.render(context, request))

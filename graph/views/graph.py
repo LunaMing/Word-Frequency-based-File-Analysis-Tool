@@ -4,14 +4,20 @@ from django.template import loader
 from algorithm import export_neo4j_data, word_freq, read_pdf_names, import_neo4j
 
 
-def get_new_graph(request):
+def get_pdf_pure_name(pdf_path_list):
     pdf_list = []
-    # 读取pdf文件名
-    pdf_path_list = read_pdf_names()
     for pdf_path in pdf_path_list:
         # res\pdf\nsdi20spring_cheng_prepub_0.pdf
         pdf_name = pdf_path.lstrip("res\\pdf\\")
         pdf_list.append(pdf_name)
+    return pdf_list
+
+
+def get_new_graph(request):
+    # 读取pdf文件名
+    pdf_path_list = read_pdf_names()
+    pdf_list = get_pdf_pure_name(pdf_path_list)
+
     # 词频统计
     doc_word_list = word_freq(pdf_path_list)
 
