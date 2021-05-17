@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
@@ -7,7 +8,24 @@ from algorithm import get_all_kind, export_neo4j_data, read_pdf_names
 from views import get_pdf_pure_name
 
 
+def setDir(filepath):
+    '''
+    如果文件夹不存在就创建，如果文件存在就清空！
+    :param filepath:需要创建的文件夹路径
+    :return:
+    '''
+    if not os.path.exists(filepath):
+        os.mkdir(filepath)
+    else:
+        shutil.rmtree(filepath)
+        os.mkdir(filepath)
+
+
 def get_index(request):
+    # 清空pdf文件夹数据
+    setDir(os.path.join("res", "pdf"))
+    # 清空数据库数据
+
     pdf_list = []
     link_list = []
     node_list = []
