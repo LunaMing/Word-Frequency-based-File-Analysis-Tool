@@ -1,5 +1,7 @@
 import traceback
 
+from py2neo import Graph
+
 from graph.models import Author, Paper, Word
 
 
@@ -76,3 +78,8 @@ def import_neo4j(paper_data, word_data):
         for word_name in word_list:
             word = Word.get_or_create({"name": word_name})[0]
             paper.word.connect(word)
+
+
+def clear_neo4j():
+    graph_3 = Graph("bolt://localhost:7687")
+    graph_3.delete_all()
