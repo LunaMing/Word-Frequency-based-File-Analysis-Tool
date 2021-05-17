@@ -9,5 +9,6 @@ urlpatterns = [
     path('getAllWords', get_all_words),
     path('getAllJson', get_all_json),
     path('getCountJson', get_count_json),
+    path('upload', upload),
     path('start', get_new_graph),
 ]
