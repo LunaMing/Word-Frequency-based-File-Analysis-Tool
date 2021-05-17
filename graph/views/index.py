@@ -32,12 +32,14 @@ def get_index(request):
     pdf_list = []
     link_list = []
     node_list = []
+    cloud_list = []
 
     template = loader.get_template('graph/index.html')
     context = {
         'pdfs': pdf_list,
         'links': link_list,
         'nodes': node_list,
+        'clouds': cloud_list,
     }
     return HttpResponse(template.render(context, request))
 
@@ -75,11 +77,13 @@ def upload(request):
         pdf_list = get_pdf_pure_name(pdf_path_list)
         link_list = []
         node_list = []
+        cloud_list = []
 
         template = loader.get_template('graph/index.html')
         context = {
             'pdfs': pdf_list,
             'links': link_list,
             'nodes': node_list,
+            'clouds': cloud_list,
         }
         return HttpResponse(template.render(context, request))
