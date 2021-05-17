@@ -3,6 +3,7 @@ node_modules/
 
 # My Program Output
 output/
+res/pdf/
 
 # PyCharm
 .idea/
