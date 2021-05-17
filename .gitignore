@@ -4,6 +4,7 @@ node_modules/
 # My Program Output
 output/
 res/pdf/
+static/graph/images/cloud
 
 # PyCharm
 .idea/

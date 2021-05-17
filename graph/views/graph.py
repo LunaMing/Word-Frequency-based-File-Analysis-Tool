@@ -1,7 +1,9 @@
+import os
+
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 
-from algorithm import export_neo4j_data, word_freq, read_pdf_names, import_neo4j
+from algorithm import export_neo4j_data, word_freq, read_pdf_names, import_neo4j, draw_cloud, read_text
 
 
 def get_pdf_pure_name(pdf_path_list):
@@ -24,6 +26,16 @@ def get_new_graph(request):
     # 导入数据库
     import_neo4j(pdf_list, doc_word_list)
 
+    # 词云
+    cloud_list = []
+    cloud_str_list = read_text(pdf_path_list)
+    for i in range(len(pdf_path_list)):
+        cloud_str = cloud_str_list[i]
+        cloud_path = os.path.join("graph", "images", "cloud", str(i) + ".png")
+        cloud_draw_path = os.path.join("static", cloud_path)
+        draw_cloud(cloud_str, cloud_draw_path)
+        cloud_list.append(cloud_path)
+
     # 图谱
     res = export_neo4j_data()
     node_list = []
@@ -35,6 +47,7 @@ def get_new_graph(request):
         'pdfs': pdf_list,
         'links': link_list,
         'nodes': node_list,
+        'clouds': cloud_list,
     }
     return HttpResponse(template.render(context, request))
 

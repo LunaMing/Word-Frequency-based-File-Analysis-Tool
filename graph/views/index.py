@@ -32,12 +32,14 @@ def get_index(request):
     pdf_list = []
     link_list = []
     node_list = []
+    cloud_list = []
 
     template = loader.get_template('graph/index.html')
     context = {
         'pdfs': pdf_list,
         'links': link_list,
         'nodes': node_list,
+        'clouds': cloud_list,
     }
     return HttpResponse(template.render(context, request))
 
@@ -60,8 +62,8 @@ def get_all_json(r):
 
 def upload(request):
     if request.method == 'POST':  # 获取对象
-        obj = request.FILES.get('fafafa')
-        if obj is not None:
+        files = request.FILES.getlist('fafafa')  # 返回一个列表
+        for obj in files:
             # 上传文件的文件名 　　　　
             print(obj.name)
             BASE_DIR = "res"
@@ -75,11 +77,13 @@ def upload(request):
         pdf_list = get_pdf_pure_name(pdf_path_list)
         link_list = []
         node_list = []
+        cloud_list = []
 
         template = loader.get_template('graph/index.html')
         context = {
             'pdfs': pdf_list,
             'links': link_list,
             'nodes': node_list,
+            'clouds': cloud_list,
         }
         return HttpResponse(template.render(context, request))
