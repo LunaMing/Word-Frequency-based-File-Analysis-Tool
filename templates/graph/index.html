@@ -55,8 +55,8 @@
     <h3>Files</h3>
     <form action="/upload" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <i style="padding: 10px" class="fa fa-plus" onclick="fileUpload.click()"> Upload File </i>
-        <i style="padding: 10px" class="fa fa-refresh" onclick="submit_btn.click()"> Refresh Files </i>
+        <i style="padding: 10px" class="fa fa-plus" onclick="fileUpload.click()"> Select PDF Files </i>
+        <i style="padding: 10px" class="fa fa-refresh" onclick="submit_btn.click()"> Upload & Refresh </i>
         <input id="fileUpload" Style="visibility: hidden" type="file" multiple="multiple" name="fafafa">
         <input id="submit_btn" Style="visibility: hidden" type="submit">
     </form>
