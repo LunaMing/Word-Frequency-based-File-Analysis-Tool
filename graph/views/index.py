@@ -40,13 +40,14 @@ def get_all_json(r):
 def upload(request):
     if request.method == 'POST':  # 获取对象
         obj = request.FILES.get('fafafa')
-        # 上传文件的文件名 　　　　
-        print(obj.name)
-        BASE_DIR = "res"
-        f = open(os.path.join(BASE_DIR, 'pdf', obj.name), 'wb')
-        for chunk in obj.chunks():
-            f.write(chunk)
-        f.close()
+        if obj is not None:
+            # 上传文件的文件名 　　　　
+            print(obj.name)
+            BASE_DIR = "res"
+            f = open(os.path.join(BASE_DIR, 'pdf', obj.name), 'wb')
+            for chunk in obj.chunks():
+                f.write(chunk)
+            f.close()
 
         # 读取pdf文件名
         pdf_path_list = read_pdf_names()
