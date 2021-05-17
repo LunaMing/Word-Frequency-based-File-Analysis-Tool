@@ -69,11 +69,7 @@ def export_neo4j_data():
 def import_neo4j(paper_data, word_data):
     for i in range(len(paper_data)):
         paper_title = paper_data[i]
-        try:
-            paper = Paper.get_or_create({"title": paper_title})[0]
-        except Exception as e:
-            traceback.print_exc()
-            return e
+        paper = Paper.get_or_create({"title": paper_title})[0]
         word_list = word_data[i]
         for word_name in word_list:
             word = Word.get_or_create({"name": word_name})[0]
@@ -81,4 +77,8 @@ def import_neo4j(paper_data, word_data):
 
 
 def clear_neo4j():
-    clear_neo4j_database(db)
+    try:
+        clear_neo4j_database(db)
+    except Exception as e:
+        traceback.print_exc()
+        return e

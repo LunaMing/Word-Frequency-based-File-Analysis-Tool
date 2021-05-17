@@ -22,9 +22,7 @@ def get_new_graph(request):
     doc_word_list = word_freq(pdf_path_list)
 
     # 导入数据库
-    err = import_neo4j(pdf_list, doc_word_list)
-    if err:
-        return HttpResponse("Neo4j 服务器未成功连接")
+    import_neo4j(pdf_list, doc_word_list)
 
     # 图谱
     res = export_neo4j_data()

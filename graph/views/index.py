@@ -25,7 +25,9 @@ def get_index(request):
     # 清空pdf文件夹数据
     setDir(os.path.join("res", "pdf"))
     # 清空数据库数据
-    clear_neo4j()
+    err = clear_neo4j()
+    if err:
+        return HttpResponse("Neo4j 服务器未成功连接")
 
     pdf_list = []
     link_list = []
