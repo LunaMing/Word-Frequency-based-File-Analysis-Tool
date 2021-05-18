@@ -9,11 +9,11 @@ from views import get_pdf_pure_name
 
 
 def clear_or_create(filepath):
-    '''
+    """
     如果文件夹不存在就创建，如果文件存在就清空！
     :param filepath:需要创建的文件夹路径
     :return:
-    '''
+    """
     if not os.path.exists(filepath):
         os.mkdir(filepath)
     else:
@@ -35,6 +35,7 @@ def get_index(request):
     link_list = []
     node_list = []
     cloud_list = []
+    total_list = []
 
     template = loader.get_template('graph/index.html')
     context = {
@@ -42,6 +43,7 @@ def get_index(request):
         'links': link_list,
         'nodes': node_list,
         'clouds': cloud_list,
+        'totals': total_list,
     }
     return HttpResponse(template.render(context, request))
 
@@ -91,6 +93,7 @@ def upload(request):
         link_list = []
         node_list = []
         cloud_list = []
+        total_list = []
 
         template = loader.get_template('graph/index.html')
         context = {
@@ -98,5 +101,6 @@ def upload(request):
             'links': link_list,
             'nodes': node_list,
             'clouds': cloud_list,
+            'totals': total_list,
         }
         return HttpResponse(template.render(context, request))

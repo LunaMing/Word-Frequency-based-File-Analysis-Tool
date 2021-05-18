@@ -218,8 +218,10 @@
     <div id="word_cloud">
         <h2>Word Cloud</h2>
         {% load static %}
-        <p style="margin-left: 150px">Total Result</p>
-        <img src="{% static 'graph/images/cloud/total.png' %}" alt="word cloud">
+        {% for total in totals %}
+            <p style="margin-left: 150px">{{ total.title }}</p>
+            <img src="{% static total.path %}" alt="word cloud">
+        {% endfor %}
         　　 {% for cloud in clouds %}
         <p style="margin-left: 150px">[{{ cloud.index }}]</p>
         <img src="{% static cloud.path %}" alt="word cloud">

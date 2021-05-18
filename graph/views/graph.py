@@ -61,8 +61,15 @@ def get_new_graph(request):
         }
         cloud_obj_list.append(obj)
     # 画一个会议总体的词云图
-    total_cloud_path = os.path.join("static", "graph", "images", "cloud", "total.png")
-    draw_cloud(total_str, total_cloud_path)
+    total_path = os.path.join("graph", "images", "cloud", "total.png")
+    total_draw_path = os.path.join("static", total_path)
+    draw_cloud(total_str, total_draw_path)
+    total_list = []
+    obj = {
+        "title": "Total Result",
+        "path": total_path
+    }
+    total_list.append(obj)
 
     # 图谱
     res = export_neo4j_data()
@@ -76,6 +83,7 @@ def get_new_graph(request):
         'links': link_list,
         'nodes': node_list,
         'clouds': cloud_obj_list,
+        'totals': total_list,
     }
     return HttpResponse(template.render(context, request))
 
