@@ -8,7 +8,7 @@ from algorithm import get_all_kind, export_neo4j_data, read_pdf_names, clear_neo
 from views import get_pdf_pure_name
 
 
-def setDir(filepath):
+def clear_or_create(filepath):
     '''
     如果文件夹不存在就创建，如果文件存在就清空！
     :param filepath:需要创建的文件夹路径
@@ -23,7 +23,9 @@ def setDir(filepath):
 
 def get_index(request):
     # 清空pdf文件夹数据
-    setDir(os.path.join("res", "pdf"))
+    clear_or_create(os.path.join("res", "pdf"))
+    # 清空cloud文件夹数据
+    clear_or_create(os.path.join("static", "graph", "images", "cloud"))
     # 清空数据库数据
     err = clear_neo4j()
     if err:
